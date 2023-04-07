@@ -1,0 +1,7247 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: t.inoue@backtech.co.jp
+  description: web api reference
+  title: Pocket Therapist Web API Reference
+  version: 1.0.0
+servers:
+- url: /
+tags:
+- description: user's common api between premium and advanced plan
+  name: users_common
+  x-displayName: common
+- description: user's api for premium plan
+  name: users_premium
+  x-displayName: premium
+- description: user's api for suite plan
+  name: users_suite
+  x-displayName: suite
+- description: therapist's common api between premium and advanced plan
+  name: therapists_common
+  x-displayName: common
+- description: therapist's api for premium plan
+  name: therapists_premium
+  x-displayName: premium
+- description: admin api
+  name: admin
+paths:
+  /users/timezones:
+    get:
+      operationId: getTimezoneList
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/timezone'
+                type: array
+          description: OK
+      summary: get timezone list
+      tags:
+      - common
+      x-eov-operation-handler: controllers/CommonController
+  /gu/api/auth/appointments:
+    post:
+      operationId: createAppointmentByUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_appointment_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appointment'
+          description: OK
+      summary: create appointment
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/appointments/mine:
+    get:
+      operationId: getMyAppointments
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/appointment'
+                type: array
+          description: OK
+      summary: get appointments by user
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/appointments/{id}/cancel:
+    post:
+      operationId: cancelAppointmentByUser
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/cancel_appointment_params'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appointment'
+          description: OK
+      summary: cancel appointment
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/calendars/myTherapist:
+    get:
+      operationId: getCalendarOfMyTherapist
+      parameters:
+      - description: タイムゾーン
+        in: query
+        name: timezone
+        schema:
+          example: Asia/Tokyo
+          type: string
+      - description: 開始日
+        in: query
+        name: startDate
+        schema:
+          example: 2020-10-01
+          format: YYYY-MM-DD
+          type: string
+      - description: 終了日
+        in: query
+        name: endDate
+        schema:
+          example: 2020-10-06
+          format: YYYY-MM-DD
+          type: string
+      - explode: true
+        in: query
+        name: appointmentType
+        required: true
+        schema:
+          $ref: '#/components/schemas/appointment_type'
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/calendar'
+          description: OK
+      summary: get the calendar of my therapist
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/calendars/weekly:
+    get:
+      operationId: getWeeklyCalendar
+      parameters:
+      - description: タイムゾーン
+        in: query
+        name: timezone
+        schema:
+          example: Asia/Tokyo
+          type: string
+      - description: 開始日
+        in: query
+        name: startDate
+        schema:
+          example: 2020-10-01
+          format: YYYY-MM-DD
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/weekly_calendar'
+          description: OK
+      summary: get weekly calendar
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/calendars/selectedTherapist:
+    get:
+      operationId: getSelectedTherapistCalendar
+      parameters:
+      - explode: true
+        in: query
+        name: therapistId
+        required: false
+        schema:
+          example: 1
+          type: number
+        style: form
+      - description: タイムゾーン
+        in: query
+        name: timezone
+        schema:
+          example: Asia/Tokyo
+          type: string
+      - description: 開始日
+        in: query
+        name: startDate
+        schema:
+          example: 2020-10-01
+          format: YYYY-MM-DD
+          type: string
+      - description: 終了日
+        in: query
+        name: endDate
+        schema:
+          example: 2020-10-06
+          format: YYYY-MM-DD
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/calendar'
+          description: OK
+      summary: get selected therapist calendar
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/users/switchEmailAndSubEmail:
+    post:
+      operationId: switchEmailAndSubEmail
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/switch_email_and_sub_email_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/switch_email_and_sub_email_response'
+          description: OK
+      summary: switch email and sub email
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/userEmails:
+    get:
+      operationId: getUserEmails
+      parameters:
+      - explode: true
+        in: query
+        name: isVerified
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/user_email'
+                type: array
+          description: OK
+      summary: get user emails
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+    post:
+      operationId: createUnverifiedUserSubEmail
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_user_email_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_email'
+          description: OK
+      summary: create an unverified sub email
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/userEmails/{id}:
+    delete:
+      operationId: deleteSubEmail
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: number
+        style: simple
+      responses:
+        "200":
+          description: OK
+      summary: delete sub email
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/userEmailNotificationSchedules:
+    get:
+      operationId: getUserEmailNotificationSchedules
+      parameters:
+      - explode: true
+        in: query
+        name: UserEmailId
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/user_email_notification_schedule'
+                type: array
+          description: OK
+      summary: get notification schedule settings
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+    post:
+      operationId: createUserEmailNotificationSchedules
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_user_email_notification_schedules_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/user_email_notification_schedule'
+                type: array
+          description: OK
+      summary: create notification schedule settings of sub email
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/userMissions:
+    get:
+      operationId: getUserMissions
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_missions'
+          description: OK
+      summary: get user's missions
+      tags:
+      - users_premium
+      x-eov-operation-handler: controllers/UsersPremiumController
+  /gu/api/auth/userMissionExecutions:
+    post:
+      operationId: createUserMissionExecution
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_mission_execution_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_mission_execution'
+          description: OK
+      summary: save that user has completed the mission
+      tags:
+      - users_premium
+      x-eov-operation-handler: controllers/UsersPremiumController
+  /gu/api/auth/userMissionExecutions/{UserMissionExecutionId}:
+    delete:
+      operationId: deleteUserMissionExecution
+      parameters:
+      - in: path
+        name: UserMissionExecutionId
+        required: true
+        schema:
+          example: 4a1df803-bbe3-4936-bd79-303bf89917db
+          type: string
+      responses:
+        "204":
+          description: OK
+      summary: delete that user has completed the mission
+      tags:
+      - users_premium
+      x-eov-operation-handler: controllers/UsersPremiumController
+  /gu/api/auth/userMissionCommentTags:
+    post:
+      operationId: userPutTagOnUserMissionComment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_mission_comment_tag_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_mission_comment_tag'
+          description: ok
+      summary: put tag on comment
+      tags:
+      - users_premium
+      x-eov-operation-handler: controllers/UsersPremiumController
+  /gu/api/auth/userMissionComments:
+    post:
+      operationId: createUserMissionComment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_mission_comment_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_mission_comment'
+          description: OK
+      summary: save a comment on a mission
+      tags:
+      - users_premium
+      x-eov-operation-handler: controllers/UsersPremiumController
+  /gu/api/auth/userMissionComments/{id}/hasRead:
+    put:
+      operationId: userHaveUserMissionCommentRead
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: no content
+      summary: have mission comment read
+      tags:
+      - users_premium
+      x-eov-operation-handler: controllers/UsersPremiumController
+  /gu/api/auth/userMissionNotifications:
+    put:
+      operationId: updateUserMissionNotifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_mission_notification_request'
+        required: true
+      responses:
+        "200":
+          description: ok
+      summary: update user mission notifications
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/userGoals/mine:
+    get:
+      operationId: getMyUserGoal
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_therapist_goal'
+          description: OK
+      summary: get my user goal
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/users/my:
+    get:
+      operationId: getMyUserInfo
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+          description: OK
+      summary: get user info
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/users/my/required:
+    put:
+      operationId: updateUserRequiredInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/update_user_required_info_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+          description: OK
+      summary: update user's required info
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/consultationScheduledEvents:
+    get:
+      operationId: getConsultationScheduledEvents
+      parameters:
+      - in: query
+        name: consultationType
+        schema:
+          $ref: '#/components/schemas/consultationType'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/consultation_scheduled_event'
+                type: array
+          description: OK
+      summary: get appointments
+      tags:
+      - users_premium
+      x-eov-operation-handler: controllers/UsersPremiumController
+  /gu/api/auth/therapists/mine:
+    get:
+      operationId: getMyTherapistInfo
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/therapist'
+          description: OK
+      summary: get therapist user info
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/therapists/withInfo:
+    get:
+      operationId: getMyTherapistWithInfo
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/therapist'
+          description: OK
+      summary: get therapist with info
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/therapists/appointable:
+    get:
+      operationId: getAppointableTherapists
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appointable_therapists_response'
+          description: ok
+      summary: get appointable therapists
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/therapists/{id}:
+    get:
+      operationId: getTherapistByUser
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/therapist'
+          description: OK
+      summary: get therapist by user
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/therapistReputations:
+    post:
+      operationId: createTherapistReputation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/therapist_reputation_request'
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: create a therapist reputation
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/therapistReputations/hasAnswered:
+    get:
+      operationId: checkHasAnsweredReputation
+      parameters:
+      - explode: true
+        in: query
+        name: appointmentId
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/therapist_reputation_has_answered'
+          description: OK
+      summary: check has answered reputation
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/therapistReputations/unansweredAppointments:
+    get:
+      operationId: getReputationUnansweredAppointments
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/appointment'
+                type: array
+          description: OK
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/userConfigs:
+    get:
+      operationId: getUserConfigs
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/user_config'
+                type: array
+          description: ok
+      summary: get user configs
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+    post:
+      operationId: createUserConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_user_cinfig_request'
+        required: true
+      responses:
+        "201":
+          description: created
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/userConfigs/{key}:
+    get:
+      operationId: getUserConfig
+      parameters:
+      - explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          $ref: '#/components/schemas/user_config_key'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_config'
+          description: OK
+      summary: get my config
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/userNotificatinos:
+    get:
+      operationId: getUserNotifications
+      parameters:
+      - description: 開始日
+        in: query
+        name: startDate
+        schema:
+          example: 2020-10-01
+          format: YYYY-MM-DD
+          type: string
+      - description: 終了日
+        in: query
+        name: endDate
+        schema:
+          example: 2020-10-06
+          format: YYYY-MM-DD
+          type: string
+      - description: タイムゾーン
+        in: query
+        name: timezone
+        schema:
+          example: Asia/Tokyo
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/user_notification'
+                type: array
+          description: OK
+      summary: get user notifications
+      tags:
+      - users_premium
+      x-eov-operation-handler: controllers/UsersPremiumController
+  /gu/api/auth/userTherapists:
+    post:
+      operationId: allocateTherapist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/allocate_therapist_request'
+        required: true
+      responses:
+        "200":
+          description: ok
+      summary: associate the user with the therapist
+      tags:
+      - users_premium
+      x-eov-operation-handler: controllers/UsersPremiumController
+  /gu/api/auth/companyConfigs:
+    get:
+      operationId: getCompanyConfigs
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/company_config'
+                type: array
+          description: ok
+      summary: get company configs
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/userPlanStatuses/mine/latest:
+    get:
+      operationId: getLatestUserPlanStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_plan_status'
+          description: ok
+      summary: get users plans status
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/users/resendingEmailVerificationMail:
+    post:
+      operationId: resendVerificationMail
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/resending_email_verification_mail_request'
+        required: true
+      responses:
+        "200":
+          description: ok
+      summary: resend verification mail
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/userStatuses:
+    get:
+      operationId: getUserStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_status'
+          description: ok
+      summary: get user statuses
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/noAuth/users/tempSuite:
+    post:
+      operationId: createTempUserOfSuite
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_temp_user_of_suite_request'
+        required: true
+      responses:
+        "200":
+          description: ok
+      summary: createTempUserOfSuite
+      tags:
+      - users_suite
+      x-eov-operation-handler: controllers/UsersSuiteController
+  /gu/api/noAuth/users/my/required:
+    put:
+      operationId: updateNoAuthUserRequiredInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/update_noAuth_user_required_info_request'
+        required: true
+      responses:
+        "204":
+          description: no content
+      summary: update noAuth user's required info
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/noAuth/companyConfigs/mine:
+    get:
+      operationId: getCompanyConfigsByNoAuthUser
+      parameters:
+      - explode: true
+        in: query
+        name: verificationToken
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/company_config'
+                type: array
+          description: ok
+      summary: get company configs by noAuth user
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/noAuth/users/my:
+    get:
+      operationId: getNoAuthUserInfo
+      parameters:
+      - explode: true
+        in: query
+        name: verificationToken
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/no_auth_user_info'
+          description: ok
+      summary: get noAuth user info
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/noAuth/users/myCompanyCode:
+    get:
+      operationId: getCompanyCodeByNoAuthUser
+      parameters:
+      - explode: true
+        in: query
+        name: verificationToken
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                example: btsuite
+                type: string
+          description: ok
+      summary: get company code by noAuth user
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/movie4Measures/similarMovies/{movie4MeasureId}:
+    get:
+      operationId: getSimilarMovies
+      parameters:
+      - description: 動画ID
+        in: path
+        name: movie4MeasureId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/movie_for_measure'
+                type: array
+          description: OK
+      summary: get similar movies by movie id
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/userMissionMovies:
+    put:
+      operationId: updateUserMissionMovie
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_mission_movie_request'
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: update movie of mission
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/assignments/mine:
+    get:
+      operationId: getAssignments
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/assignmentWithTherapistInfo'
+                type: array
+          description: OK
+      summary: get assignments
+      tags:
+      - users_suite
+      x-eov-operation-handler: controllers/UsersSuiteController
+  /therapist/api/overallRecordPainTypes:
+    get:
+      operationId: getOverallRecordPainTypes
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/overall_record_pain_type'
+                type: array
+          description: OK
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/scheduleSettings:
+    get:
+      operationId: getScheduleSetting
+      parameters:
+      - explode: true
+        in: query
+        name: userId
+        required: true
+        schema:
+          example: 1
+          type: number
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/schedule_setting'
+          description: OK
+      summary: get schedule setting
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+    post:
+      operationId: createScheduleSetting
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/schedule_setting'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/schedule_setting'
+          description: OK
+      summary: create schedule setting
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/therapists/my:
+    get:
+      operationId: getTherapistMyUserInfo
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/therapist'
+          description: OK
+      summary: get therapist user info
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/userTherapists:
+    get:
+      operationId: getUserTherapists
+      parameters:
+      - description: |
+          |MGradeId|gradeName|
+          |---|---|
+          |1|スタンダード|
+          |2|アドバンスド|
+          |3|プレミアム|
+        explode: true
+        in: query
+        name: MGradeId
+        required: true
+        schema:
+          enum:
+          - 2
+          - 3
+          example: 2
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_therapist_response'
+          description: OK
+      summary: get assined users list
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/userGoals/{userId}/users:
+    get:
+      operationId: getUserTherapistGoal
+      parameters:
+      - explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          example: 1
+          type: number
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_therapist_goal'
+          description: OK
+      summary: get user goal
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+    post:
+      operationId: createUserTherapistGoal
+      parameters:
+      - explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          example: 1
+          type: number
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_therapist_goal_request'
+        required: true
+      responses:
+        "200":
+          description: ok
+      summary: post user goal
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/movie4Measures2:
+    get:
+      operationId: getMovie4Measures2
+      parameters:
+      - description: |
+          |version|description|
+          |---|---|
+          |1.0|for standard and advanced|
+          |2.0|for premium|
+        explode: true
+        in: query
+        name: version
+        required: false
+        schema:
+          example: "2.0"
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/movie_for_measure'
+                type: array
+          description: ok
+      summary: get movies
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/movie4MeasureTagGroups:
+    get:
+      operationId: getMovie4MeasureTagGroups
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/movie_for_measure_tag_group'
+                type: array
+          description: ok
+      summary: get movie tags
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/therapistAssignLimits:
+    get:
+      operationId: getAssignableLimit
+      parameters:
+      - explode: true
+        in: query
+        name: MGrade
+        required: false
+        schema:
+          $ref: '#/components/schemas/MGrade'
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/therapist_assign_limit'
+                type: array
+          description: ok
+      summary: get assignable limit
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+    put:
+      operationId: updateAssignableLimit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/update_assign_limit_request'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/therapist_assign_limit'
+                type: array
+          description: ok
+      summary: update assignable limit
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/currentAssignedNumber:
+    get:
+      operationId: getCurrentAssignedNumber
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/current_assigned_number'
+          description: ok
+      summary: get current assigned number
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/userMissionComments:
+    post:
+      operationId: therapistCreateUserMissionComment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_mission_comment_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_mission_comment'
+          description: OK
+      summary: save a comment on a mission
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/userMissionComments/{id}/hasRead:
+    put:
+      operationId: therapistHaveUserMissionCommentRead
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: no content
+      summary: have mission comment read
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/usermissions:
+    get:
+      operationId: getUserTherapistMissions
+      parameters:
+      - explode: true
+        in: query
+        name: UserId
+        required: true
+        schema:
+          example: 1
+          type: number
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_missions'
+          description: ok
+      summary: get user missions
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+    post:
+      operationId: createUserTherapistMissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_mission_create_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_mission'
+          description: ok
+      summary: create user mission
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/userMissions/{id}:
+    put:
+      operationId: updateUserTherapistMission
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          example: 1a1df803-bbe3-4936-bd79-303bf89917db
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_mission_update_request'
+        required: true
+      responses:
+        "200":
+          description: ok
+      summary: update user mission
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/userMissionCommentTags:
+    post:
+      operationId: therapistPutTagOnUserMissionComment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_mission_comment_tag_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_mission_comment_tag'
+          description: ok
+      summary: put tag on comment
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/appointments:
+    post:
+      operationId: createAppointmentByTherapist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_appointment_by_therapist_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appointment'
+          description: ok
+      summary: create appointment
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/appointments/{id}/cancel:
+    post:
+      operationId: cancelAppointmentByTherapist
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/cancel_appointment_params'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appointment'
+          description: OK
+      summary: cancel appointment
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/schedules:
+    post:
+      operationId: updateSchedule
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/schedule'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/schedule'
+          description: ok
+      summary: update schedule
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/calendars:
+    get:
+      operationId: getCalendarOfMine
+      parameters:
+      - description: タイムゾーン
+        in: query
+        name: timezone
+        schema:
+          example: Asia/Tokyo
+          type: string
+      - description: 開始日
+        in: query
+        name: startDate
+        schema:
+          example: 2020-10-01
+          format: YYYY-MM-DD
+          type: string
+      - description: 終了日
+        in: query
+        name: endDate
+        schema:
+          example: 2020-10-06
+          format: YYYY-MM-DD
+          type: string
+      - explode: true
+        in: query
+        name: appointmentType
+        required: true
+        schema:
+          $ref: '#/components/schemas/appointment_type'
+        style: form
+      - explode: true
+        in: query
+        name: forPreview
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/calendar'
+          description: ok
+      summary: get calendar of mine
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/integrations/oauth/accounts:
+    get:
+      operationId: getOauthAccountsByTherapist
+      parameters:
+      - explode: true
+        in: query
+        name: provider
+        required: false
+        schema:
+          $ref: '#/components/schemas/oauth_provider'
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/oauth_account'
+                type: array
+          description: ok
+      summary: get oauth accounts
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/integrations/oauth/accounts/{id}:
+    delete:
+      operationId: deleteOauthAccount
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ok
+      summary: delete oauth account
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/appointments/mine:
+    get:
+      operationId: getAppointmentsByTherapist
+      parameters:
+      - explode: true
+        in: query
+        name: userId
+        required: false
+        schema:
+          type: number
+        style: form
+      - explode: true
+        in: query
+        name: minStartTime
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: maxStartTime
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          $ref: '#/components/schemas/appointment_type'
+        style: form
+      - explode: true
+        in: query
+        name: canceled
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/appointment'
+                type: array
+          description: ok
+      summary: get appointments by therapist
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/consultationSupports:
+    get:
+      operationId: getConsultationSupports
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/consultation_support'
+                type: array
+          description: OK
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/userOverallRecords:
+    get:
+      operationId: getUserOverallRecords
+      parameters:
+      - explode: true
+        in: query
+        name: UserId
+        required: true
+        schema:
+          example: 1
+          type: number
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/appointment_record'
+                type: array
+          description: OK
+      summary: get user overall records
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+    post:
+      operationId: createUserOverallRecords
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createUserOverallRecords_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_overall_record'
+          description: ok
+      summary: create user overall records
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /therapist/api/consultationSupports/complete:
+    post:
+      operationId: completeConsultationSupport
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/complete_consultation_support'
+        required: true
+      responses:
+        "200":
+          description: ok
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/userOverallRecords/{id}:
+    put:
+      operationId: updateUserOverallRecord
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          example: 1a1df803-bbe3-4936-bd79-303bf89917db
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateUserOverallRecord_request'
+        required: true
+      responses:
+        "200":
+          description: ok
+      summary: update user overall record
+      tags:
+      - therapists_premium
+      x-eov-operation-handler: controllers/TherapistsPremiumController
+  /admin/api/therapistCalendar/weekly:
+    get:
+      operationId: getWeeklyCalendarByAdmin
+      parameters:
+      - description: タイムゾーン
+        in: query
+        name: timezone
+        schema:
+          example: Asia/Tokyo
+          type: string
+      - description: 開始日
+        in: query
+        name: startDate
+        schema:
+          example: 2020-10-01
+          format: YYYY-MM-DD
+          type: string
+      - explode: true
+        in: query
+        name: MGrade
+        required: false
+        schema:
+          $ref: '#/components/schemas/MGrade'
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/weekly_calendar'
+          description: OK
+      summary: admin get weekly calendar
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/movie4Measures:
+    get:
+      operationId: adminGetMovie4Measures
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/movie_for_measure'
+                type: array
+          description: ok
+      summary: get movies
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+    post:
+      operationId: adminCreateMovie4Measure
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/movie_for_measure_update_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/movie_for_measure'
+          description: ok
+      summary: create a movie
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/movie4Measures/{id}:
+    get:
+      operationId: adminGetMovie4Measure
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: number
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/movie_for_measure'
+          description: ok
+      summary: get a movie
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+    put:
+      operationId: adminUpdateMovie4Measure
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: number
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/movie_for_measure_update_request'
+        required: true
+      responses:
+        "200":
+          description: ok
+      summary: update movie
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/movie4MeasureTags:
+    get:
+      operationId: adminGetMovie4MeasureTags
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/movie_for_measure_tag'
+                type: array
+          description: ok
+      summary: get movie tags
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+    post:
+      operationId: adminCreateMovie4MeasureTag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/movie_for_measure_tag_update_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/movie_for_measure_tag'
+          description: ok
+      summary: create a movie tag
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/movie4MeasureTags/{id}:
+    put:
+      operationId: adminUpdateMovie4MeasureTag
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: number
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/movie_for_measure_tag_update_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/movie_for_measure_tag'
+          description: ok
+      summary: update movie tag
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/movie4MeasureTagGroups:
+    get:
+      operationId: adminGetMovie4MeasureTagGroups
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/movie_for_measure_tag_group'
+                type: array
+          description: ok
+      summary: get movie tag groups
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+    post:
+      operationId: adminCreateMovie4MeasureTagGroup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/movie_for_measure_tag_group_update_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/movie_for_measure_tag_group'
+          description: ok
+      summary: create a movie tag group
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/movie4MeasureTagGroups/{id}:
+    put:
+      operationId: adminUpdateMovie4MeasureTagGroup
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: number
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/movie_for_measure_tag_group_update_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/movie_for_measure_tag_group'
+          description: ok
+      summary: update movie tag group
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/mTherapistStrongTypes:
+    get:
+      operationId: adminGetMTherapistStrongTypes
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/m_therapist_strong_type'
+                type: array
+          description: ok
+      summary: get MTherapistStrongTypes
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/mTherapistPersonalityTypes:
+    get:
+      operationId: adminGetMTherapistPersonalityTypes
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/m_therapist_personality_type'
+                type: array
+          description: ok
+      summary: get mTherapistPersonalityTypes
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/therapists/{id}/premium:
+    get:
+      operationId: adminGetTherapistPreimunData
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: number
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/admin_therapist_premium'
+          description: ok
+      summary: get admin therapist premium data
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+    put:
+      operationId: adminUpdateTherapistPreimunData
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: number
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/admin_therapist_premium_data_update_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/admin_therapist_premium'
+          description: ok
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/therapists/{id}/premiumUsers:
+    get:
+      operationId: adminGetPremiumUsers
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: number
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/admin_premium_user'
+                type: array
+          description: ok
+      summary: get admin therapist premium data
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/therapists/appointmentTimes:
+    get:
+      operationId: adminGetTherapistAppointmentTimes
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/therapist_appointment_times'
+                type: array
+          description: OK
+      summary: get admin therapist appointment times
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/therapistReputations:
+    get:
+      operationId: adminGetTherapistReputations
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/admin_therapist_reputation'
+                type: array
+          description: ok
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/therapistReputations/{id}/statuses:
+    put:
+      operationId: adminUpdateTherapistReputationStatuses
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: number
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/admin_therapist_reputation_status_update_request'
+        required: true
+      responses:
+        "200":
+          description: ok
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/therapistCalendar:
+    get:
+      operationId: adminGetCalendarOfAnyTherapist
+      parameters:
+      - explode: true
+        in: query
+        name: therapistId
+        required: false
+        schema:
+          example: 1
+          type: number
+        style: form
+      - description: タイムゾーン
+        in: query
+        name: timezone
+        schema:
+          example: Asia/Tokyo
+          type: string
+      - description: 開始日
+        in: query
+        name: startDate
+        schema:
+          example: 2020-10-01
+          format: YYYY-MM-DD
+          type: string
+      - description: 終了日
+        in: query
+        name: endDate
+        schema:
+          example: 2020-10-06
+          format: YYYY-MM-DD
+          type: string
+      - explode: true
+        in: query
+        name: appointmentType
+        required: true
+        schema:
+          $ref: '#/components/schemas/appointment_type'
+        style: form
+      - explode: true
+        in: query
+        name: canReserveWithin24Hours
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/calendar'
+          description: OK
+      summary: get the calendar of any therapist
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/therapistAppointments:
+    get:
+      operationId: adminGetAppointmentsOfAnyTherapist
+      parameters:
+      - explode: true
+        in: query
+        name: therapistId
+        required: false
+        schema:
+          type: number
+        style: form
+      - explode: true
+        in: query
+        name: userId
+        required: false
+        schema:
+          type: number
+        style: form
+      - explode: true
+        in: query
+        name: minStartTime
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: maxStartTime
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          $ref: '#/components/schemas/appointment_type'
+        style: form
+      - explode: true
+        in: query
+        name: canceled
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/appointment'
+                type: array
+          description: OK
+      summary: get appointments of any therapist
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+    post:
+      operationId: createAppointmentByAdmin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_appointment_by_admin_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appointment'
+          description: OK
+      summary: create appointment
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/therapistAppointments/{id}/cancel:
+    post:
+      operationId: cancelAppointmentByAdmin
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/cancel_appointment_params'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appointment'
+          description: OK
+      summary: cancel appointment
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/users/availableSuiteUsers:
+    get:
+      operationId: adminGetAvailableSuiteUsers
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/admin_suite_user'
+                type: array
+          description: ok
+      summary: get available suite users
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/users/{id}/appointable:
+    get:
+      operationId: adminGetAppointableUser
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/admin_appointable_user'
+          description: ok
+      summary: get user if appointable
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/therapistIntegrations/oauth/accounts:
+    get:
+      operationId: getOauthAccountsByAdmin
+      parameters:
+      - explode: true
+        in: query
+        name: provider
+        required: false
+        schema:
+          $ref: '#/components/schemas/oauth_provider'
+        style: form
+      - explode: true
+        in: query
+        name: userId
+        required: false
+        schema:
+          type: number
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/oauth_account'
+                type: array
+          description: ok
+      summary: get oauth accounts
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /gu/api/auth/mCompanies/my:
+    get:
+      operationId: getMyCompanyInfo
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/m_company'
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/noAuth/mCompanies:
+    get:
+      operationId: getCompanyInfo
+      parameters:
+      - explode: true
+        in: query
+        name: companyUniqueKey
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/company'
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/troublePosts:
+    get:
+      operationId: getPostsByUser
+      parameters:
+      - explode: true
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: categoryId
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_posts_response'
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+    post:
+      operationId: createPost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_post'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/post'
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/troublePosts/mine:
+    get:
+      operationId: getMyPosts
+      parameters:
+      - explode: true
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_posts_response'
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/troublePosts/countOfMineThisMonth:
+    get:
+      operationId: getPostsCountOfMineThisMonth
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: integer
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/troublePosts/{id}:
+    get:
+      operationId: getPostByUser
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/post'
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/troublePosts/{id}/reaction:
+    post:
+      operationId: createPostReaction
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/troublePosts/{id}/reaction/undo:
+    post:
+      operationId: undoPostReaction
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/troublePostReplies:
+    post:
+      operationId: createPostReplyByUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_post_reply'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/post'
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/troublePostReplies/{id}/reaction:
+    post:
+      operationId: createPostReplyReaction
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/troublePostReplies/{id}/reaction/undo:
+    post:
+      operationId: undoPostReplyReaction
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /gu/api/auth/troublePostFavoriteCategories:
+    get:
+      operationId: getFavoritePostCategories
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/post_category'
+                type: array
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+    post:
+      operationId: createFavoritePostCategories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_favorite_post_categories'
+        required: true
+      responses:
+        "200":
+          description: ok
+      tags:
+      - users_common
+      x-eov-operation-handler: controllers/UsersCommonController
+  /api/auth/troublePostCategories:
+    get:
+      operationId: getPostCategories
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/post_category'
+                type: array
+          description: ok
+      tags:
+      - common
+      x-eov-operation-handler: controllers/CommonController
+  /therapist/api/troublePosts/replyRequired:
+    get:
+      operationId: getReplyRequiredPosts
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/post'
+                type: array
+          description: ok
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/troublePosts/notAssigned:
+    get:
+      operationId: getNotAssignedPosts
+      parameters:
+      - explode: true
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_posts_response'
+          description: ok
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/troublePosts/{id}:
+    get:
+      operationId: getPostByTherapist
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/post'
+          description: ok
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/troublePosts/{id}/assign:
+    post:
+      operationId: assignPost
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ok
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/troublePostReplies:
+    post:
+      operationId: createPostReplyByTherapist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_post_reply'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/post'
+          description: ok
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/troublePostNotificationSettings:
+    delete:
+      operationId: deleteTroublePostNotificationSettings
+      responses:
+        "200":
+          description: ok
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+    get:
+      operationId: getTroublePostNotificationSettings
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/troublePostNotificationSettings'
+          description: ok
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+    post:
+      operationId: createTroublePostNotificationSettings
+      responses:
+        "200":
+          description: ok
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /therapist/api/users/{id}/troublePosts:
+    get:
+      operationId: getUserAllPosts
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - explode: true
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_posts_response'
+          description: ok
+      tags:
+      - therapists_common
+      x-eov-operation-handler: controllers/TherapistsCommonController
+  /admin/api/troublePosts/{id}:
+    get:
+      operationId: getPostByAdmin
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/post'
+          description: ok
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/troublePosts/{id}/hide:
+    post:
+      operationId: hidePost
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/hide_post_request'
+        required: true
+      responses:
+        "200":
+          description: ok
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/troublePostReplies/{id}/hide:
+    post:
+      operationId: hidePostReply
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/hide_post_request'
+        required: true
+      responses:
+        "200":
+          description: ok
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+  /admin/api/troublePosts/{id}/unassign:
+    post:
+      operationId: unassignPost
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: ok
+      tags:
+      - admin
+      x-eov-operation-handler: controllers/AdminController
+components:
+  parameters:
+    MGradeId:
+      description: |
+        |MGradeId|gradeName|
+        |---|---|
+        |1|スタンダード|
+        |2|アドバンスド|
+        |3|プレミアム|
+      explode: true
+      in: query
+      name: MGradeId
+      required: true
+      schema:
+        enum:
+        - 2
+        - 3
+        example: 2
+        type: integer
+      style: form
+    MGrade:
+      explode: true
+      in: query
+      name: MGrade
+      required: false
+      schema:
+        $ref: '#/components/schemas/MGrade'
+      style: form
+    UserId:
+      explode: true
+      in: query
+      name: UserId
+      required: true
+      schema:
+        example: 1
+        type: number
+      style: form
+    userId:
+      explode: true
+      in: query
+      name: userId
+      required: true
+      schema:
+        example: 1
+        type: number
+      style: form
+    user_id_in_path:
+      explode: false
+      in: path
+      name: userId
+      required: true
+      schema:
+        example: 1
+        type: number
+      style: simple
+    UserMissionId:
+      explode: false
+      in: path
+      name: id
+      required: true
+      schema:
+        example: 1a1df803-bbe3-4936-bd79-303bf89917db
+        type: string
+      style: simple
+    UserOverallRecordId:
+      explode: false
+      in: path
+      name: id
+      required: true
+      schema:
+        example: 1a1df803-bbe3-4936-bd79-303bf89917db
+        type: string
+      style: simple
+    key_in_path:
+      explode: false
+      in: path
+      name: key
+      required: true
+      schema:
+        $ref: '#/components/schemas/user_config_key'
+      style: simple
+    id:
+      explode: false
+      in: path
+      name: id
+      required: true
+      schema:
+        type: number
+      style: simple
+    reputation_id:
+      explode: false
+      in: path
+      name: reputationId
+      required: true
+      schema:
+        type: integer
+      style: simple
+    user_email_id:
+      explode: true
+      in: query
+      name: UserEmailId
+      required: false
+      schema:
+        type: integer
+      style: form
+    is_verified:
+      explode: true
+      in: query
+      name: isVerified
+      required: false
+      schema:
+        type: boolean
+      style: form
+    therapist_reputation_type:
+      explode: true
+      in: query
+      name: type
+      required: false
+      schema:
+        $ref: '#/components/schemas/therapist_reputation_type'
+      style: form
+    oauth_provider:
+      explode: true
+      in: query
+      name: provider
+      required: false
+      schema:
+        $ref: '#/components/schemas/oauth_provider'
+      style: form
+    appointment_type:
+      explode: true
+      in: query
+      name: appointmentType
+      required: true
+      schema:
+        $ref: '#/components/schemas/appointment_type'
+      style: form
+    for_preview:
+      explode: true
+      in: query
+      name: forPreview
+      required: false
+      schema:
+        type: boolean
+      style: form
+    therapistId:
+      explode: true
+      in: query
+      name: therapistId
+      required: false
+      schema:
+        example: 1
+        type: number
+      style: form
+    page_size:
+      explode: true
+      in: query
+      name: size
+      required: false
+      schema:
+        type: integer
+      style: form
+    page:
+      explode: true
+      in: query
+      name: page
+      required: false
+      schema:
+        type: integer
+      style: form
+    categoryId:
+      explode: true
+      in: query
+      name: categoryId
+      required: false
+      schema:
+        type: string
+      style: form
+    appointmentId:
+      explode: true
+      in: query
+      name: appointmentId
+      required: true
+      schema:
+        type: string
+      style: form
+    canReserveWithin24Hours:
+      explode: true
+      in: query
+      name: canReserveWithin24Hours
+      required: false
+      schema:
+        type: boolean
+      style: form
+    verificationToken:
+      explode: true
+      in: query
+      name: verificationToken
+      required: true
+      schema:
+        type: string
+      style: form
+    id_in_path:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+    timezone:
+      description: タイムゾーン
+      in: query
+      name: timezone
+      schema:
+        example: Asia/Tokyo
+        type: string
+    startDate:
+      description: 開始日
+      in: query
+      name: startDate
+      schema:
+        example: 2020-10-01
+        format: YYYY-MM-DD
+        type: string
+    endDate:
+      description: 終了日
+      in: query
+      name: endDate
+      schema:
+        example: 2020-10-06
+        format: YYYY-MM-DD
+        type: string
+    UserMissionExecutionId:
+      in: path
+      name: UserMissionExecutionId
+      required: true
+      schema:
+        example: 4a1df803-bbe3-4936-bd79-303bf89917db
+        type: string
+    timeZone:
+      description: タイムゾーン
+      in: query
+      name: timezone
+      schema:
+        example: Asia/Tokyo
+        type: string
+    movie4MeasureId:
+      description: 動画ID
+      in: path
+      name: movie4MeasureId
+      required: true
+      schema:
+        type: string
+  schemas:
+    troublePostNotificationSettings:
+      example:
+        isNotificationConfigured: true
+      properties:
+        isNotificationConfigured:
+          type: boolean
+      type: object
+    complete_consultation_support:
+      properties:
+        appointmentId:
+          type: string
+      required:
+      - appointmentId
+      type: object
+    consultation_support:
+      example:
+        appointment:
+          therapistId: 6.027456183070403
+          cancellationReason: cancellationReason
+          timezone: timezone
+          type:
+            duration: 1.4658129805029452
+            name: null
+            label: label
+          userName: userName
+          userId: 0.8008281904610115
+          meetingUrl: meetingUrl
+          isCancelOnTheDay: false
+          meetingPassword: meetingPassword
+          calendlyEventId: calendlyEventId
+          canceledAt: canceledAt
+          therapistName: therapistName
+          cancellerId: 5.962133916683182
+          startTime: startTime
+          id: id
+          endTime: endTime
+          dueToTherapistCancel: true
+        user:
+          companyName: companyName
+          codeExpiration: 2000-01-23T04:56:07.000+00:00
+          name: name
+          registeredAt: 2000-01-23T04:56:07.000+00:00
+          id: 0
+      properties:
+        user:
+          $ref: '#/components/schemas/consultation_support_user'
+        appointment:
+          $ref: '#/components/schemas/appointment'
+      required:
+      - appointment
+      - missions
+      - user
+      type: object
+    consultation_support_user:
+      example:
+        companyName: companyName
+        codeExpiration: 2000-01-23T04:56:07.000+00:00
+        name: name
+        registeredAt: 2000-01-23T04:56:07.000+00:00
+        id: 0
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        companyName:
+          type: string
+        registeredAt:
+          format: date-time
+          nullable: true
+          type: string
+        codeExpiration:
+          format: date-time
+          type: string
+      required:
+      - id
+      - name
+      type: object
+    create_favorite_post_categories:
+      properties:
+        categoryIds:
+          items:
+            type: string
+          type: array
+      required:
+      - categoryIds
+      type: object
+    get_posts_response:
+      example:
+        page: 6
+        totalCount: 0
+        rows:
+        - userInfo:
+            sex: null
+            age: 2.3021358869347655
+          createdAt: createdAt
+          replies:
+          - createdAt: createdAt
+            reactionInfo:
+              isReacted: true
+              count: 5.962133916683182
+              type: type
+            id: id
+            isMine: true
+            content: content
+            therapist:
+              name: name
+              userId: 5.637376656633329
+          - createdAt: createdAt
+            reactionInfo:
+              isReacted: true
+              count: 5.962133916683182
+              type: type
+            id: id
+            isMine: true
+            content: content
+            therapist:
+              name: name
+              userId: 5.637376656633329
+          reactionInfo:
+            isReacted: true
+            count: 5.962133916683182
+            type: type
+          isAllowedToPublishByOwner: true
+          id: id
+          assignee:
+            name: name
+            userId: 1.4658129805029452
+          isMine: true
+          isVisible: true
+          title: title
+          category:
+            name: name
+            id: id
+          content: content
+        - userInfo:
+            sex: null
+            age: 2.3021358869347655
+          createdAt: createdAt
+          replies:
+          - createdAt: createdAt
+            reactionInfo:
+              isReacted: true
+              count: 5.962133916683182
+              type: type
+            id: id
+            isMine: true
+            content: content
+            therapist:
+              name: name
+              userId: 5.637376656633329
+          - createdAt: createdAt
+            reactionInfo:
+              isReacted: true
+              count: 5.962133916683182
+              type: type
+            id: id
+            isMine: true
+            content: content
+            therapist:
+              name: name
+              userId: 5.637376656633329
+          reactionInfo:
+            isReacted: true
+            count: 5.962133916683182
+            type: type
+          isAllowedToPublishByOwner: true
+          id: id
+          assignee:
+            name: name
+            userId: 1.4658129805029452
+          isMine: true
+          isVisible: true
+          title: title
+          category:
+            name: name
+            id: id
+          content: content
+      properties:
+        totalCount:
+          type: integer
+        page:
+          type: integer
+        rows:
+          items:
+            $ref: '#/components/schemas/post'
+          type: array
+      required:
+      - page
+      - rows
+      - totalCount
+      type: object
+    hide_post_request:
+      properties:
+        reason:
+          type: string
+      required:
+      - reason
+      type: object
+    create_post_reply:
+      properties:
+        postId:
+          type: string
+        content:
+          type: string
+      required:
+      - content
+      - postId
+      type: object
+    create_post:
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        categoryId:
+          type: string
+        isAllowedToPublishByOwner:
+          type: boolean
+      required:
+      - categoryId
+      - content
+      - title
+      type: object
+    post:
+      example:
+        userInfo:
+          sex: null
+          age: 2.3021358869347655
+        createdAt: createdAt
+        replies:
+        - createdAt: createdAt
+          reactionInfo:
+            isReacted: true
+            count: 5.962133916683182
+            type: type
+          id: id
+          isMine: true
+          content: content
+          therapist:
+            name: name
+            userId: 5.637376656633329
+        - createdAt: createdAt
+          reactionInfo:
+            isReacted: true
+            count: 5.962133916683182
+            type: type
+          id: id
+          isMine: true
+          content: content
+          therapist:
+            name: name
+            userId: 5.637376656633329
+        reactionInfo:
+          isReacted: true
+          count: 5.962133916683182
+          type: type
+        isAllowedToPublishByOwner: true
+        id: id
+        assignee:
+          name: name
+          userId: 1.4658129805029452
+        isMine: true
+        isVisible: true
+        title: title
+        category:
+          name: name
+          id: id
+        content: content
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          $ref: '#/components/schemas/post_category'
+        assignee:
+          $ref: '#/components/schemas/post_assignee'
+        replies:
+          items:
+            $ref: '#/components/schemas/post_reply'
+          type: array
+        reactionInfo:
+          $ref: '#/components/schemas/post_reaction_info'
+        userInfo:
+          $ref: '#/components/schemas/post_user_info'
+        isMine:
+          type: boolean
+        isVisible:
+          type: boolean
+        createdAt:
+          type: string
+        isAllowedToPublishByOwner:
+          type: boolean
+      required:
+      - category
+      - content
+      - createdAt
+      - id
+      - isAllowedToPublishByOwner
+      - reactionInfo
+      - replies
+      - title
+      type: object
+    post_user_info:
+      example:
+        sex: null
+        age: 2.3021358869347655
+      properties:
+        age:
+          type: number
+        sex:
+          $ref: '#/components/schemas/user_sex'
+      type: object
+    post_assignee:
+      example:
+        name: name
+        userId: 1.4658129805029452
+      properties:
+        userId:
+          type: number
+        name:
+          type: string
+      required:
+      - name
+      - userId
+      type: object
+    post_reply:
+      example:
+        createdAt: createdAt
+        reactionInfo:
+          isReacted: true
+          count: 5.962133916683182
+          type: type
+        id: id
+        isMine: true
+        content: content
+        therapist:
+          name: name
+          userId: 5.637376656633329
+      properties:
+        id:
+          type: string
+        reactionInfo:
+          $ref: '#/components/schemas/post_reaction_info'
+        therapist:
+          $ref: '#/components/schemas/post_reply_therapist'
+        content:
+          type: string
+        createdAt:
+          type: string
+        isMine:
+          type: boolean
+      required:
+      - content
+      - createdAt
+      - id
+      - isMine
+      - reactionInfo
+      type: object
+    post_reply_therapist:
+      example:
+        name: name
+        userId: 5.637376656633329
+      properties:
+        userId:
+          nullable: true
+          type: number
+        name:
+          nullable: true
+          type: string
+      required:
+      - name
+      - userId
+      type: object
+    post_reaction_info:
+      example:
+        isReacted: true
+        count: 5.962133916683182
+        type: type
+      properties:
+        type:
+          type: string
+        count:
+          type: number
+        isReacted:
+          type: boolean
+      required:
+      - count
+      - type
+      type: object
+    post_category:
+      example:
+        name: name
+        id: id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+      - id
+      - name
+      type: object
+    overall_record_pain_type:
+      example:
+        name: name
+        id: 0
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+      - id
+      - name
+      type: object
+    oauth_provider:
+      enum:
+      - google
+      - zoom
+      type: string
+      x-enum-vernames:
+      - google
+      - zoom
+    oauth_account:
+      example:
+        provider: null
+        id: id
+        userId: 0.8008281904610115
+      properties:
+        id:
+          type: string
+        userId:
+          type: number
+        provider:
+          $ref: '#/components/schemas/oauth_provider'
+      required:
+      - id
+      - provider
+      - userId
+      type: object
+    schedule_setting:
+      example:
+        bufferBefore: 6.027456183070403
+        bufferAfter: 1.4658129805029452
+        limitNumberOfAppointmentsPerDay: 5.962133916683182
+        userId: 0.8008281904610115
+      properties:
+        userId:
+          type: number
+        bufferBefore:
+          nullable: true
+          type: number
+        bufferAfter:
+          nullable: true
+          type: number
+        limitNumberOfAppointmentsPerDay:
+          nullable: true
+          type: number
+      required:
+      - bufferAfter
+      - bufferBefore
+      - limitNumberOfAppointmentsPerDay
+      - userId
+      type: object
+    schedule:
+      example:
+        times:
+        - timeRanges:
+          - from: from
+            to: to
+          - from: from
+            to: to
+          type: null
+          value: value
+        - timeRanges:
+          - from: from
+            to: to
+          - from: from
+            to: to
+          type: null
+          value: value
+        timezone: timezone
+      properties:
+        timezone:
+          type: string
+        times:
+          items:
+            $ref: '#/components/schemas/schedule_time'
+          type: array
+      required:
+      - times
+      - timezone
+      type: object
+    schedule_time:
+      example:
+        timeRanges:
+        - from: from
+          to: to
+        - from: from
+          to: to
+        type: null
+        value: value
+      properties:
+        type:
+          $ref: '#/components/schemas/schedule_time_type'
+        value:
+          type: string
+        timeRanges:
+          items:
+            $ref: '#/components/schemas/schedule_time_range'
+          type: array
+      required:
+      - timeRanges
+      - type
+      - value
+      type: object
+    schedule_time_range:
+      example:
+        from: from
+        to: to
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+      required:
+      - from
+      - to
+      type: object
+    schedule_time_type:
+      enum:
+      - day
+      - date
+      type: string
+    weekly_calendar:
+      additionalProperties:
+        items:
+          $ref: '#/components/schemas/weekly_calendar_spot'
+        type: array
+      type: object
+    weekly_calendar_spot:
+      properties:
+        time:
+          example: 2021-10-11T10:00:00+09:00
+          type: string
+        userIds:
+          items:
+            type: number
+          type: array
+      required:
+      - time
+      - userIds
+      type: object
+    calendar:
+      example:
+        duration: 0.8008281904610115
+        timezone: timezone
+        dates:
+          "2021-10-11":
+          - 2021-10-11T10:00:00+09:00
+          - 2021-10-11T10:40:00+09:00
+      properties:
+        dates:
+          additionalProperties:
+            items:
+              type: string
+            type: array
+          example:
+            "2021-10-11":
+            - 2021-10-11T10:00:00+09:00
+            - 2021-10-11T10:40:00+09:00
+          type: object
+        timezone:
+          type: string
+        duration:
+          type: number
+      required:
+      - dates
+      - duration
+      - timezone
+      type: object
+    calendar_date:
+      additionalProperties:
+        items:
+          type: string
+        type: array
+      example:
+        "2021-10-11":
+        - 2021-10-11T10:00:00+09:00
+        - 2021-10-11T10:40:00+09:00
+      type: object
+    appointment:
+      example:
+        therapistId: 6.027456183070403
+        cancellationReason: cancellationReason
+        timezone: timezone
+        type:
+          duration: 1.4658129805029452
+          name: null
+          label: label
+        userName: userName
+        userId: 0.8008281904610115
+        meetingUrl: meetingUrl
+        isCancelOnTheDay: false
+        meetingPassword: meetingPassword
+        calendlyEventId: calendlyEventId
+        canceledAt: canceledAt
+        therapistName: therapistName
+        cancellerId: 5.962133916683182
+        startTime: startTime
+        id: id
+        endTime: endTime
+        dueToTherapistCancel: true
+      properties:
+        id:
+          type: string
+        userId:
+          type: number
+        therapistId:
+          type: number
+        startTime:
+          type: string
+        endTime:
+          type: string
+        type:
+          $ref: '#/components/schemas/appointment_type_object'
+        canceledAt:
+          nullable: true
+          type: string
+        cancellerId:
+          nullable: true
+          type: number
+        cancellationReason:
+          nullable: true
+          type: string
+        dueToTherapistCancel:
+          nullable: true
+          type: boolean
+        isCancelOnTheDay:
+          example: false
+          type: boolean
+        meetingUrl:
+          nullable: true
+          type: string
+        meetingPassword:
+          nullable: true
+          type: string
+        calendlyEventId:
+          nullable: true
+          type: string
+        timezone:
+          type: string
+        userName:
+          type: string
+        therapistName:
+          type: string
+      required:
+      - calendlyEventId
+      - canceledAt
+      - cancellationReason
+      - cancellerId
+      - dueToTherapistCancel
+      - endTime
+      - id
+      - isCancelOnTheDay
+      - meetingPassword
+      - meetingUrl
+      - startTime
+      - therapistId
+      - timezone
+      - type
+      - userId
+      - userName
+      type: object
+    create_appointment_request:
+      properties:
+        therapistId:
+          type: number
+        startTime:
+          format: date-time
+          type: string
+        type:
+          $ref: '#/components/schemas/appointment_type'
+        timezone:
+          type: string
+        userName:
+          type: string
+      required:
+      - startTime
+      - therapistId
+      - timezone
+      - type
+      - userName
+      type: object
+    create_appointment_by_therapist_request:
+      properties:
+        userId:
+          type: number
+        startTime:
+          format: date-time
+          type: string
+        type:
+          $ref: '#/components/schemas/appointment_type'
+        timezone:
+          type: string
+        userName:
+          type: string
+      required:
+      - startTime
+      - timezone
+      - type
+      - userId
+      - userName
+      type: object
+    create_appointment_by_admin_request:
+      properties:
+        userId:
+          type: number
+        therapistId:
+          type: number
+        startTime:
+          format: date-time
+          type: string
+        type:
+          $ref: '#/components/schemas/appointment_type'
+        timezone:
+          type: string
+        canReserveWithin24Hours:
+          type: boolean
+      required:
+      - startTime
+      - therapistId
+      - timezone
+      - type
+      - userId
+      type: object
+    appointment_type_object:
+      example:
+        duration: 1.4658129805029452
+        name: null
+        label: label
+      properties:
+        name:
+          $ref: '#/components/schemas/appointment_type'
+        label:
+          type: string
+        duration:
+          type: number
+      required:
+      - duration
+      - label
+      - name
+      type: object
+    appointment_type:
+      enum:
+      - first
+      - follow
+      - regular
+      type: string
+    cancel_appointment_params:
+      properties:
+        cancellationReason:
+          type: string
+        dueToTherapistCancel:
+          type: boolean
+      type: object
+    resending_email_verification_mail_request:
+      properties:
+        email:
+          type: string
+      required:
+      - email
+      type: object
+    therapist_reputation_has_answered:
+      example:
+        hasAnswered: true
+      properties:
+        hasAnswered:
+          type: boolean
+      required:
+      - hasAnswered
+      type: object
+    therapist_assign_limit:
+      example:
+        number: 5
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        MGradeId: 1
+        TherapistId: 6
+        id: 0
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        TherapistId:
+          type: integer
+        MGradeId:
+          type: integer
+        number:
+          type: integer
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - MGradeId
+      - TherapistId
+      - createdAt
+      - id
+      - number
+      - updatedAt
+      type: object
+    company_config:
+      example:
+        MCompanyId: 6
+        id: 0
+        value: value
+        key: null
+      properties:
+        id:
+          type: integer
+        MCompanyId:
+          type: integer
+        key:
+          $ref: '#/components/schemas/company_config_key'
+        value:
+          type: string
+      required:
+      - MCompanyId
+      - id
+      - key
+      type: object
+    company_config_key:
+      enum:
+      - IS_REQUIRED_HURIGANA
+      - POSTS_MAX_NUMBER_OF_MONTH
+      - PAIN_TYPE_RESTRICTION
+      - DISABLE_INSURANCE_CARD_INPUT
+      - IS_REQUIRED_EMPLOYEE_CODE_INPUT
+      - LIMIT_NUMBER_OF_USER_REGISTRATION
+      - LIMIT_NUMBER_OF_ADVANCED_USER
+      - ALLOW_FAMILY_USE
+      - IS_REQUIRED_AGREEMENT_OF_PROVIDING_PERSONAL_DATA
+      - IS_INSURANCE_CARD_INPUT_MAX_LENGTH
+      type: string
+      x-enum-varnames:
+      - IS_REQUIRED_HURIGANA
+      - POSTS_MAX_NUMBER_OF_MONTH
+      - PAIN_TYPE_RESTRICTION
+      - DISABLE_INSURANCE_CARD_INPUT
+      - IS_REQUIRED_EMPLOYEE_CODE_INPUT
+      - LIMIT_NUMBER_OF_USER_REGISTRATION
+      - LIMIT_NUMBER_OF_ADVANCED_USER
+      - ALLOW_FAMILY_USE
+      - IS_REQUIRED_AGREEMENT_OF_PROVIDING_PERSONAL_DATA
+      - IS_INSURANCE_CARD_INPUT_MAX_LENGTH
+    therapist:
+      example:
+        therapistId: 5
+        reputations:
+        - score: 9
+          createdAt: 2000-01-23T04:56:07.000+00:00
+          UserId: 2
+          TherapistId: 7
+          comment: comment
+          id: 5
+          type: null
+          status: null
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        - score: 9
+          createdAt: 2000-01-23T04:56:07.000+00:00
+          UserId: 2
+          TherapistId: 7
+          comment: comment
+          id: 5
+          type: null
+          status: null
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        User:
+          lastAccessedAt: 2000-01-23T04:56:07.000+00:00
+          birthDay: 2000-01-23T04:56:07.000+00:00
+          role: 1
+          chatImageUrl: /uploadImages/1353/chatImage.jpg
+          healthInsuranceCardNumber: healthInsuranceCardNumber
+          MGradeId: 5
+          sex: null
+          registeredAt: 2000-01-23T04:56:07.000+00:00
+          familyNameKana: familyNameKana
+          employeeCode: employeeCode
+          firstNameKana: firstNameKana
+          healthInsuranceCardType: INSURED
+          firstName: firstName
+          createdAt: 2000-01-23T04:56:07.000+00:00
+          healthInsuranceCardSymbol: healthInsuranceCardSymbol
+          phone: phone
+          familyName: familyName
+          MCompanyId: 6
+          id: 0
+          email: email
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        customerTeamComment: customerTeamComment
+        sex: null
+        subInformation:
+          experience: experience
+          hobby: hobby
+        introductionText: introductionText
+        therapistNameKana: therapistNameKana
+        personalityTypes:
+        - id: id
+          text: text
+        - id: id
+          text: text
+        userId: 1
+        canAppointment: true
+        experiencePeriodYear: experiencePeriodYear
+        therapistType: therapistType
+        movieThumbnailUrl: movieThumbnailUrl
+        UserId: 6
+        imageUrl: imageUrl
+        therapistName: therapistName
+        movieUrl: movieUrl
+        strongPoints:
+        - id: id
+          text: text
+        - id: id
+          text: text
+        comment: comment
+        id: 0
+      properties:
+        id:
+          type: integer
+        UserId:
+          type: integer
+        imageUrl:
+          type: string
+        comment:
+          type: string
+        canAppointment:
+          type: boolean
+        User:
+          $ref: '#/components/schemas/user'
+        userId:
+          type: integer
+        therapistId:
+          type: integer
+        movieUrl:
+          type: string
+        movieThumbnailUrl:
+          type: string
+        therapistName:
+          type: string
+        therapistNameKana:
+          type: string
+        sex:
+          $ref: '#/components/schemas/user_sex'
+        therapistType:
+          type: string
+        introductionText:
+          type: string
+        experiencePeriodYear:
+          type: string
+        customerTeamComment:
+          type: string
+        reputations:
+          items:
+            $ref: '#/components/schemas/therapistReputation'
+          type: array
+        strongPoints:
+          items:
+            $ref: '#/components/schemas/strongPoint'
+          type: array
+        subInformation:
+          $ref: '#/components/schemas/subInformation'
+        personalityTypes:
+          items:
+            $ref: '#/components/schemas/personalityType'
+          type: array
+      required:
+      - User
+      - UserId
+      - canAppointment
+      - customerTeamComment
+      - experiencePeriodYear
+      - id
+      - introductionText
+      - personalityTypes
+      - reputations
+      - strongPoints
+      - subInformation
+      - therapistId
+      - therapistName
+      - therapistNameKana
+      - therapistType
+      - userId
+      type: object
+    admin_therapist_premium:
+      example:
+        TherapistPersonalityTypes:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          MTherapistPersonalityTypeId: 5
+          TherapistId: 2
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          MTherapistPersonalityTypeId: 5
+          TherapistId: 2
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        firstName: firstName
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        canAppointment: true
+        deletedAt: 2000-01-23T04:56:07.000+00:00
+        TherapistSubInformations:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          data: data
+          TherapistId: 9
+          id: 7
+          type: type
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          data: data
+          TherapistId: 9
+          id: 7
+          type: type
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        TherapistStrongTypes:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          TherapistId: 5
+          MTherapistStrongTypeId: 1
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          TherapistId: 5
+          MTherapistStrongTypeId: 1
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        UserId: 6
+        familyName: familyName
+        id: 0
+        email: email
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        UserId:
+          type: integer
+        firstName:
+          type: string
+        familyName:
+          type: string
+        email:
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        deletedAt:
+          format: date-time
+          type: string
+        canAppointment:
+          type: boolean
+        TherapistStrongTypes:
+          items:
+            $ref: '#/components/schemas/therapist_strong_type'
+          type: array
+        TherapistPersonalityTypes:
+          items:
+            $ref: '#/components/schemas/therapist_personality_type'
+          type: array
+        TherapistSubInformations:
+          items:
+            $ref: '#/components/schemas/therapist_sub_information'
+          type: array
+      required:
+      - TherapistPersonalityTypes
+      - TherapistStrongTypes
+      - TherapistSubInformations
+      - UserId
+      - canAppointment
+      - createdAt
+      - email
+      - familyName
+      - firstName
+      - id
+      type: object
+    admin_premium_user:
+      example:
+        firstName: firstName
+        firstAppointment:
+          therapistId: 6.027456183070403
+          cancellationReason: cancellationReason
+          timezone: timezone
+          type:
+            duration: 1.4658129805029452
+            name: null
+            label: label
+          userName: userName
+          userId: 0.8008281904610115
+          meetingUrl: meetingUrl
+          isCancelOnTheDay: false
+          meetingPassword: meetingPassword
+          calendlyEventId: calendlyEventId
+          canceledAt: canceledAt
+          therapistName: therapistName
+          cancellerId: 5.962133916683182
+          startTime: startTime
+          id: id
+          endTime: endTime
+          dueToTherapistCancel: true
+        familyName: familyName
+        MGradeName: PREMIUM
+        userId: 0
+      properties:
+        userId:
+          type: integer
+        firstName:
+          type: string
+        familyName:
+          type: string
+        firstAppointment:
+          $ref: '#/components/schemas/appointment'
+        MGradeName:
+          enum:
+          - PREMIUM
+          type: string
+      required:
+      - MGradeName
+      - familyName
+      - firstName
+      - userId
+      type: object
+    admin_appointable_user:
+      example:
+        firstName: firstName
+        MCompanyName: MCompanyName
+        familyName: familyName
+        MCompanyId: 6
+        MGradeName: PREMIUM
+        userId: 0
+      properties:
+        userId:
+          type: integer
+        firstName:
+          type: string
+        familyName:
+          type: string
+        MCompanyId:
+          type: integer
+        MCompanyName:
+          type: string
+        MGradeName:
+          $ref: '#/components/schemas/MGrade'
+      required:
+      - MCompanyId
+      - MCompanyName
+      - MGradeName
+      - familyName
+      - firstName
+      - userId
+      type: object
+    admin_suite_user:
+      example:
+        firstName: firstName
+        MCompanyName: MCompanyName
+        familyName: familyName
+        MCompanyId: 6
+        MGradeName: SUITE
+        userId: 0
+      properties:
+        userId:
+          type: integer
+        firstName:
+          type: string
+        familyName:
+          type: string
+        MCompanyId:
+          type: integer
+        MCompanyName:
+          type: string
+        MGradeName:
+          enum:
+          - SUITE
+          type: string
+      required:
+      - MCompanyId
+      - MCompanyName
+      - MGradeName
+      - familyName
+      - firstName
+      - userId
+      type: object
+    admin_therapist_reputation:
+      example:
+        score: 5
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        UserId: 6
+        TherapistId: 1
+        comment: comment
+        id: 0
+        type: null
+        Therapist:
+          therapistId: 5
+          reputations:
+          - score: 9
+            createdAt: 2000-01-23T04:56:07.000+00:00
+            UserId: 2
+            TherapistId: 7
+            comment: comment
+            id: 5
+            type: null
+            status: null
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          - score: 9
+            createdAt: 2000-01-23T04:56:07.000+00:00
+            UserId: 2
+            TherapistId: 7
+            comment: comment
+            id: 5
+            type: null
+            status: null
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          User:
+            lastAccessedAt: 2000-01-23T04:56:07.000+00:00
+            birthDay: 2000-01-23T04:56:07.000+00:00
+            role: 1
+            chatImageUrl: /uploadImages/1353/chatImage.jpg
+            healthInsuranceCardNumber: healthInsuranceCardNumber
+            MGradeId: 5
+            sex: null
+            registeredAt: 2000-01-23T04:56:07.000+00:00
+            familyNameKana: familyNameKana
+            employeeCode: employeeCode
+            firstNameKana: firstNameKana
+            healthInsuranceCardType: INSURED
+            firstName: firstName
+            createdAt: 2000-01-23T04:56:07.000+00:00
+            healthInsuranceCardSymbol: healthInsuranceCardSymbol
+            phone: phone
+            familyName: familyName
+            MCompanyId: 6
+            id: 0
+            email: email
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          customerTeamComment: customerTeamComment
+          sex: null
+          subInformation:
+            experience: experience
+            hobby: hobby
+          introductionText: introductionText
+          therapistNameKana: therapistNameKana
+          personalityTypes:
+          - id: id
+            text: text
+          - id: id
+            text: text
+          userId: 1
+          canAppointment: true
+          experiencePeriodYear: experiencePeriodYear
+          therapistType: therapistType
+          movieThumbnailUrl: movieThumbnailUrl
+          UserId: 6
+          imageUrl: imageUrl
+          therapistName: therapistName
+          movieUrl: movieUrl
+          strongPoints:
+          - id: id
+            text: text
+          - id: id
+            text: text
+          comment: comment
+          id: 0
+        status: null
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        UserId:
+          type: integer
+        TherapistId:
+          type: integer
+        Therapist:
+          $ref: '#/components/schemas/therapist'
+        score:
+          type: integer
+        comment:
+          type: string
+        status:
+          $ref: '#/components/schemas/therapist_reputation_status'
+        type:
+          $ref: '#/components/schemas/therapist_reputation_type'
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - Therapist
+      - TherapistId
+      - UserId
+      - comment
+      - createdAt
+      - id
+      - score
+      - status
+      - type
+      - updatedAt
+      type: object
+    user:
+      example:
+        lastAccessedAt: 2000-01-23T04:56:07.000+00:00
+        birthDay: 2000-01-23T04:56:07.000+00:00
+        role: 1
+        chatImageUrl: /uploadImages/1353/chatImage.jpg
+        healthInsuranceCardNumber: healthInsuranceCardNumber
+        MGradeId: 5
+        sex: null
+        registeredAt: 2000-01-23T04:56:07.000+00:00
+        familyNameKana: familyNameKana
+        employeeCode: employeeCode
+        firstNameKana: firstNameKana
+        healthInsuranceCardType: INSURED
+        firstName: firstName
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        healthInsuranceCardSymbol: healthInsuranceCardSymbol
+        phone: phone
+        familyName: familyName
+        MCompanyId: 6
+        id: 0
+        email: email
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        MCompanyId:
+          type: integer
+        email:
+          type: string
+        familyName:
+          type: string
+        familyNameKana:
+          type: string
+        firstName:
+          type: string
+        firstNameKana:
+          type: string
+        sex:
+          $ref: '#/components/schemas/user_sex'
+        birthDay:
+          format: date-time
+          type: string
+        phone:
+          type: string
+        healthInsuranceCardSymbol:
+          type: string
+        healthInsuranceCardNumber:
+          type: string
+        healthInsuranceCardType:
+          enum:
+          - INSURED
+          - DEPENDENT
+          type: string
+        employeeCode:
+          type: string
+        lastAccessedAt:
+          format: date-time
+          type: string
+        role:
+          description: |
+            | value | description |
+            |-----------|-------|
+            | 0 | 管理者 |
+            | 1 | 一般ユーザー |
+            | 2 | セラピスト |
+          type: integer
+        chatImageUrl:
+          description: chat image url which is relative path of this app domain
+          example: /uploadImages/1353/chatImage.jpg
+          type: string
+        registeredAt:
+          format: date-time
+          nullable: true
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        MGradeId:
+          type: integer
+      required:
+      - birthDay
+      - createdAt
+      - email
+      - familyName
+      - firstName
+      - id
+      - lastAccessedAt
+      - registeredAt
+      - role
+      - sex
+      type: object
+    user_sex:
+      enum:
+      - 0
+      - 1
+      type: integer
+      x-enum-varnames:
+      - MALE
+      - FEMALE
+    user_therapist:
+      example:
+        latestMessageAt: 2017-01-02T12:00:00Z
+        latestSenderType: 2
+        sex: null
+        codeExpiration: 2021-09-21T01:08:08.031Z
+        registeredAt: 2000-01-23T04:56:07.000+00:00
+        unreadCount: "2"
+        isNew: false
+        isActiveCustomer: true
+        MPainTypeId: 0
+        firstName: 健人
+        replyLater: false
+        MCompanyName: 株式会社テストA
+        firstAppointment:
+          therapistId: 6.027456183070403
+          cancellationReason: cancellationReason
+          timezone: timezone
+          type:
+            duration: 1.4658129805029452
+            name: null
+            label: label
+          userName: userName
+          userId: 0.8008281904610115
+          meetingUrl: meetingUrl
+          isCancelOnTheDay: false
+          meetingPassword: meetingPassword
+          calendlyEventId: calendlyEventId
+          canceledAt: canceledAt
+          therapistName: therapistName
+          cancellerId: 5.962133916683182
+          startTime: startTime
+          id: id
+          endTime: endTime
+          dueToTherapistCancel: true
+        UserId: 1
+        userPlanStatusEndDate: 2000-01-23T04:56:07.000+00:00
+        familyName: 田中
+        MCompanyId: 1
+        isExpiredCustomer: false
+        painTypes:
+        - MPainTypeId: 1
+          UserId: 6
+          name: name
+        - MPainTypeId: 1
+          UserId: 6
+          name: name
+        age: 5
+        status: 1
+        allocatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        UserId:
+          example: 1
+          type: integer
+        status:
+          example: 1
+          type: integer
+        replyLater:
+          example: false
+          type: boolean
+        isNew:
+          example: false
+          type: boolean
+        familyName:
+          example: 田中
+          type: string
+        firstName:
+          example: 健人
+          type: string
+        sex:
+          $ref: '#/components/schemas/user_sex'
+        MCompanyId:
+          example: 1
+          type: integer
+        MCompanyName:
+          example: 株式会社テストA
+          type: string
+        codeExpiration:
+          example: 2021-09-21T01:08:08.031Z
+          format: date-time
+          type: string
+        unreadCount:
+          example: "2"
+          type: string
+        latestSenderType:
+          example: 2
+          type: integer
+        latestMessageAt:
+          example: 2017-01-02T12:00:00Z
+          format: date-time
+          type: string
+        isActiveCustomer:
+          example: true
+          type: boolean
+        isExpiredCustomer:
+          example: false
+          type: boolean
+        registeredAt:
+          format: date-time
+          nullable: true
+          type: string
+        userPlanStatusEndDate:
+          format: date-time
+          nullable: true
+          type: string
+        MPainTypeId:
+          type: integer
+        painTypes:
+          items:
+            $ref: '#/components/schemas/painTypes'
+          type: array
+        firstAppointment:
+          $ref: '#/components/schemas/appointment'
+        allocatedAt:
+          format: date-time
+          type: string
+        age:
+          type: integer
+      required:
+      - UserId
+      - familyName
+      - firstName
+      - registeredAt
+      - sex
+      type: object
+    appointment_record:
+      allOf:
+      - $ref: '#/components/schemas/appointment'
+      - $ref: '#/components/schemas/appointment_record_allOf'
+      - $ref: '#/components/schemas/appointment_record_allOf_1'
+      type: object
+    user_overall_record:
+      oneOf:
+      - $ref: '#/components/schemas/user_overall_first_record'
+      - $ref: '#/components/schemas/user_overall_soap_record'
+    user_overall_record_common:
+      properties:
+        id:
+          type: string
+        UserId:
+          type: integer
+        AppointmentId:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - AppointmentId
+      - UserId
+      - id
+      type: object
+    user_overall_first_record:
+      allOf:
+      - $ref: '#/components/schemas/user_overall_record_common'
+      - $ref: '#/components/schemas/user_overall_first_record_allOf'
+    user_overall_first_record_pain_type:
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+      - id
+      - name
+      type: object
+    user_overall_soap_record:
+      allOf:
+      - $ref: '#/components/schemas/user_overall_record_common'
+      - $ref: '#/components/schemas/user_overall_soap_record_allOf'
+    user_overall_first_record_create_request:
+      properties:
+        UserId:
+          type: integer
+        AppointmentId:
+          type: string
+        type:
+          enum:
+          - first
+          type: string
+        FirstRecord:
+          $ref: '#/components/schemas/user_overall_first_record_create_request_FirstRecord'
+      required:
+      - AppointmentId
+      - FirstRecord
+      - UserId
+      - type
+      type: object
+    user_overall_soap_record_create_request:
+      properties:
+        UserId:
+          type: integer
+        AppointmentId:
+          type: string
+        type:
+          enum:
+          - soap
+          type: string
+        SoapRecord:
+          $ref: '#/components/schemas/user_overall_soap_record_create_request_SoapRecord'
+      required:
+      - AppointmentId
+      - SoapRecord
+      - UserId
+      - type
+      type: object
+    user_overall_first_record_update_request:
+      allOf:
+      - $ref: '#/components/schemas/user_overall_first_record_update_request_allOf'
+      - $ref: '#/components/schemas/user_overall_first_record_create_request'
+    user_overall_soap_record_update_request:
+      allOf:
+      - $ref: '#/components/schemas/user_overall_first_record_update_request_allOf'
+      - $ref: '#/components/schemas/user_overall_soap_record_create_request'
+    painTypes:
+      example:
+        MPainTypeId: 1
+        UserId: 6
+        name: name
+      properties:
+        UserId:
+          type: integer
+        MPainTypeId:
+          type: integer
+        name:
+          type: string
+      required:
+      - MPainTypeId
+      - UserId
+      - name
+      type: object
+    admin_user_therapist:
+      properties:
+        id:
+          type: integer
+        User:
+          $ref: '#/components/schemas/admin_user_therapist_user'
+      type: object
+    admin_user_therapist_user:
+      properties:
+        id:
+          type: integer
+        MCompany:
+          type: object
+        UserStatus:
+          $ref: '#/components/schemas/user_status'
+      type: object
+    user_status:
+      example:
+        emailVerified: true
+        activeUser: true
+        UserId: 6
+        id: 0
+      properties:
+        id:
+          type: integer
+        UserId:
+          type: integer
+        activeUser:
+          type: boolean
+        emailVerified:
+          type: boolean
+      required:
+      - UserId
+      - activeUser
+      - emailVerified
+      - id
+      type: object
+    m_therapist_strong_type:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        deletedAt: 2000-01-23T04:56:07.000+00:00
+        name: name
+        id: 0
+        text: text
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        text:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        deletedAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - createdAt
+      - id
+      - name
+      - text
+      - updatedAt
+      type: object
+    m_therapist_personality_type:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        deletedAt: 2000-01-23T04:56:07.000+00:00
+        name: name
+        id: 0
+        text: text
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        text:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        deletedAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - createdAt
+      - id
+      - name
+      - text
+      - updatedAt
+      type: object
+    therapist_sub_information:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        data: data
+        TherapistId: 9
+        id: 7
+        type: type
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        TherapistId:
+          type: integer
+        type:
+          type: string
+        data:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - TherapistId
+      - createdAt
+      - data
+      - id
+      - type
+      - updatedAt
+      type: object
+    therapist_strong_type:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        TherapistId: 5
+        MTherapistStrongTypeId: 1
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        MTherapistStrongTypeId:
+          type: integer
+        TherapistId:
+          type: integer
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - MTherapistStrongTypeId
+      - TherapistId
+      - createdAt
+      type: object
+    therapist_personality_type:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        MTherapistPersonalityTypeId: 5
+        TherapistId: 2
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        MTherapistPersonalityTypeId:
+          type: integer
+        TherapistId:
+          type: integer
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - MTherapistPersonalityTypeId
+      - TherapistId
+      - createdAt
+      type: object
+    user_therapist_goal:
+      example:
+        currentStep: 1
+        step4: step4
+        goal: 子供を肩車する
+        UserId: 42
+        TherapistId: 2
+        id: 1
+        step2: step2
+        step3: step3
+        step1: step1
+      properties:
+        id:
+          example: 1
+          type: integer
+        UserId:
+          example: 42
+          type: integer
+        TherapistId:
+          example: 2
+          type: integer
+        goal:
+          example: 子供を肩車する
+          type: string
+        step1:
+          type: string
+        step2:
+          type: string
+        step3:
+          type: string
+        step4:
+          type: string
+        currentStep:
+          example: 1
+          type: integer
+      type: object
+    user_config:
+      example:
+        id: a38c87b3-cb6c-4ad5-a19f-0686f9223598
+        value: "true"
+        key: null
+      properties:
+        id:
+          example: a38c87b3-cb6c-4ad5-a19f-0686f9223598
+          type: string
+        key:
+          $ref: '#/components/schemas/user_config_key'
+        value:
+          example: "true"
+          type: string
+      required:
+      - key
+      type: object
+    user_config_key:
+      enum:
+      - TIME_ZONE
+      - IF_DISPLAYED_FAVORITE_CATEGORY_POPUP
+      - IF_CONFIRM_FIRST_POST_REPLY
+      type: string
+      x-enum-varnames:
+      - TIME_ZONE
+      - IF_DISPLAYED_FAVORITE_CATEGORY_POPUP
+      - IF_CONFIRM_FIRST_POST_REPLY
+    user_email:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        isVerified: true
+        UserId: 6
+        id: 0
+        verificationTokenExpiredAt: 2000-01-23T04:56:07.000+00:00
+        email: email
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        UserId:
+          type: integer
+        email:
+          type: string
+        isVerified:
+          type: boolean
+        verificationTokenExpiredAt:
+          format: date-time
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - UserId
+      - createdAt
+      - email
+      - id
+      - isVerified
+      - updatedAt
+      - verificationTokenExpiredAt
+      type: object
+    user_email_notification_schedule:
+      example:
+        hourMinuteTo: hourMinuteTo
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        UserEmailId: 0
+        hourMinuteFrom: hourMinuteFrom
+        dayOfTheWeek: 3
+        id: id
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: string
+        UserEmailId:
+          type: integer
+        dayOfTheWeek:
+          maximum: 6
+          minimum: 0
+          type: integer
+        hourMinuteFrom:
+          type: string
+        hourMinuteTo:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - UserEmailId
+      - createdAt
+      - dayOfTheWeek
+      - hourMinuteFrom
+      - hourMinuteTo
+      - id
+      - updatedAt
+      type: object
+    user_plan_status:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        endDate: 2000-01-23T04:56:07.000+00:00
+        UserId: 0
+        PChargeId: PChargeId
+        id: id
+        type: type
+        startDate: 2000-01-23T04:56:07.000+00:00
+        planPeriodMonth: planPeriodMonth
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: string
+        UserId:
+          type: integer
+        startDate:
+          format: date-time
+          type: string
+        endDate:
+          format: date-time
+          type: string
+        type:
+          type: string
+        planPeriodMonth:
+          type: string
+        PChargeId:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - UserId
+      - createdAt
+      - endDate
+      - id
+      - planPeriodMonth
+      - startDate
+      - type
+      - updatedAt
+      type: object
+    appointableTherapist:
+      example:
+        therapistId: 1
+        reputations:
+        - score: 2
+          TherapistId: 5
+          comment: comment
+          id: 5
+        - score: 2
+          TherapistId: 5
+          comment: comment
+          id: 5
+        customerTeamComment: customerTeamComment
+        sex: 0
+        subInformation:
+          experience: experience
+          hobby: hobby
+        appointmentTimes: 7
+        introductionText: introductionText
+        therapistNameKana: therapistNameKana
+        personalityTypes:
+        - id: id
+          text: text
+        - id: id
+          text: text
+        userId: 6
+        experiencePeriodYear: experiencePeriodYear
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        therapistType: therapistType
+        availableConsultationSchedules:
+        - dayType:
+            name: name
+            text: text
+          timeRange:
+            name: name
+            text: text
+        - dayType:
+            name: name
+            text: text
+          timeRange:
+            name: name
+            text: text
+        movieThumbnailUrl: movieThumbnailUrl
+        imageUrl: imageUrl
+        therapistName: therapistName
+        strongPoints:
+        - id: id
+          text: text
+        - id: id
+          text: text
+        movieUrl: movieUrl
+      properties:
+        sex:
+          type: integer
+        userId:
+          type: integer
+        therapistId:
+          type: integer
+        therapistName:
+          type: string
+        therapistNameKana:
+          type: string
+        therapistType:
+          type: string
+        introductionText:
+          type: string
+        customerTeamComment:
+          type: string
+        experiencePeriodYear:
+          type: string
+        reputations:
+          items:
+            $ref: '#/components/schemas/appointableTherapist_reputations_inner'
+          type: array
+        strongPoints:
+          items:
+            $ref: '#/components/schemas/strongPoint'
+          type: array
+        personalityTypes:
+          items:
+            $ref: '#/components/schemas/personalityType'
+          type: array
+        subInformation:
+          $ref: '#/components/schemas/subInformation'
+        availableConsultationSchedules:
+          items:
+            $ref: '#/components/schemas/availableConsultationSchedule'
+          type: array
+        imageUrl:
+          type: string
+        movieUrl:
+          type: string
+        movieThumbnailUrl:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        appointmentTimes:
+          type: integer
+      required:
+      - appointmentTimes
+      - availableConsultationSchedules
+      - createdAt
+      - imageUrl
+      - introductionText
+      - personalityTypes
+      - reputations
+      - sex
+      - strongPoints
+      - subInformation
+      - therapistId
+      - therapistName
+      - therapistNameKana
+      - userId
+      type: object
+    m_company:
+      example:
+        uniqueKey: uniqueKey
+        id: 0
+      properties:
+        id:
+          type: integer
+        uniqueKey:
+          type: string
+      required:
+      - id
+      - uniqueKey
+      type: object
+    company:
+      example:
+        companyType: 6
+        kpi: kpi
+        canAddUser: true
+        uniqueKey: uniqueKey
+        codeExpiration: 2000-01-23T04:56:07.000+00:00
+        billType: billType
+        memo: memo
+        useStartDate: 2000-01-23T04:56:07.000+00:00
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        deletedAt: 2000-01-23T04:56:07.000+00:00
+        name: name
+        focused: true
+        isCharged: true
+        id: 0
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        uniqueKey:
+          type: string
+        companyType:
+          type: integer
+        codeExpiration:
+          format: date-time
+          type: string
+        memo:
+          type: string
+        kpi:
+          type: string
+        focused:
+          type: boolean
+        deletedAt:
+          format: date-time
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        useStartDate:
+          format: date-time
+          type: string
+        isCharged:
+          type: boolean
+        billType:
+          type: string
+        canAddUser:
+          type: boolean
+      required:
+      - billType
+      - canAddUser
+      - codeExpiration
+      - companyType
+      - createdAt
+      - deletedAt
+      - focused
+      - id
+      - isCharged
+      - kpi
+      - memo
+      - name
+      - uniqueKey
+      - updatedAt
+      - useStartDate
+      type: object
+    no_auth_user_info:
+      example:
+        userId: 0
+        email: email
+      properties:
+        userId:
+          type: integer
+        email:
+          type: string
+      required:
+      - email
+      - userId
+      type: object
+    therapistReputation:
+      example:
+        score: 9
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        UserId: 2
+        TherapistId: 7
+        comment: comment
+        id: 5
+        type: null
+        status: null
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        UserId:
+          type: integer
+        TherapistId:
+          type: integer
+        comment:
+          type: string
+        score:
+          type: integer
+        status:
+          $ref: '#/components/schemas/therapist_reputation_status'
+        type:
+          $ref: '#/components/schemas/therapist_reputation_type'
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      type: object
+    strongPoint:
+      example:
+        id: id
+        text: text
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+      type: object
+    personalityType:
+      example:
+        id: id
+        text: text
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+      type: object
+    subInformation:
+      example:
+        experience: experience
+        hobby: hobby
+      properties:
+        experience:
+          type: string
+        hobby:
+          type: string
+      type: object
+    UserId:
+      example: 1
+      type: number
+    mission_title:
+      example: おやすみ前に！整えストレッチ
+      type: string
+    mission_description:
+      example: 今日もお疲れさまでした！1日の最後に身体をゆったり伸ばして身体全体を整えていきましょう。
+      type: string
+    mission_UserMissionNotifications:
+      description: send empty array if you want to delete notifications when updating
+      items:
+        $ref: '#/components/schemas/user_mission_notification'
+      type: array
+    mission_Movie4MeasureIds:
+      description: send empty array if you want to delete movies when updating
+      items:
+        example: 135
+        type: integer
+      type: array
+    mission_archivedAt:
+      format: date-time
+      nullable: true
+      type: string
+    dayOfTheWeek:
+      maximum: 6
+      minimum: 0
+      type: integer
+    therapist_reputation_type:
+      enum:
+      - FIRST_CONSULTATION
+      - THE_ENTIRE_SUPPORT
+      - CONSULTATION
+      type: string
+      x-enum-varnames:
+      - FIRST_CONSULTATION
+      - THE_ENTIRE_SUPPORT
+      - CONSULTATION
+    therapist_reputation_status:
+      enum:
+      - UNVERIFIED
+      - VERIFIED
+      - REJECTED
+      type: string
+      x-enum-varnames:
+      - UNVERIFIED
+      - VERIFIED
+      - REJECTED
+    therapist_reputation_request:
+      properties:
+        score:
+          type: integer
+        comment:
+          type: string
+        type:
+          $ref: '#/components/schemas/therapist_reputation_type'
+        AppointmentId:
+          type: string
+      required:
+      - AppointmentId
+      - score
+      - type
+      type: object
+    create_user_cinfig_request:
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      required:
+      - key
+      - value
+      type: object
+    switch_email_and_sub_email_request:
+      properties:
+        UserEmailId:
+          type: integer
+      required:
+      - UserEmailId
+      type: object
+    create_user_email_notification_schedules_request:
+      properties:
+        UserEmailId:
+          type: integer
+        userEmailNotificationSchedules:
+          items:
+            $ref: '#/components/schemas/create_user_email_notification_schedule'
+          type: array
+      required:
+      - UserEmailId
+      - userEmailNotificationSchedules
+      type: object
+    create_user_email_notification_schedule:
+      properties:
+        dayOfTheWeek:
+          maximum: 6
+          minimum: 0
+          type: integer
+        hourMinuteFrom:
+          example: 06:00
+          type: string
+        hourMinuteTo:
+          example: 21:00
+          type: string
+      required:
+      - dayOfTheWeek
+      - hourMinuteFrom
+      - hourMinuteTo
+      type: object
+    create_user_email_request:
+      properties:
+        email:
+          type: string
+      required:
+      - email
+      type: object
+    update_assign_limit_request:
+      items:
+        $ref: '#/components/schemas/update_assign_limit_request_inner'
+      type: array
+    update_user_required_info_request:
+      properties:
+        familyName:
+          type: string
+        familyNameKana:
+          type: string
+        firstName:
+          type: string
+        firstNameKana:
+          type: string
+        healthInsuranceCardNumber:
+          type: string
+        healthInsuranceCardSymbol:
+          type: string
+        healthInsuranceCardType:
+          type: string
+        employeeCode:
+          type: string
+        birthDay:
+          type: string
+        sex:
+          $ref: '#/components/schemas/user_sex'
+        newPassword:
+          type: string
+        phone:
+          type: string
+      required:
+      - birthDay
+      - newPassword
+      - sex
+      type: object
+    update_noAuth_user_required_info_request:
+      properties:
+        familyName:
+          type: string
+        familyNameKana:
+          type: string
+        firstName:
+          type: string
+        firstNameKana:
+          type: string
+        healthInsuranceCardNumber:
+          type: string
+        healthInsuranceCardSymbol:
+          type: string
+        healthInsuranceCardType:
+          type: string
+        employeeCode:
+          type: string
+        birthDay:
+          type: string
+        sex:
+          $ref: '#/components/schemas/user_sex'
+        password:
+          type: string
+        phone:
+          type: string
+        verificationToken:
+          type: string
+      required:
+      - birthDay
+      - familyName
+      - firstName
+      - password
+      - phone
+      - sex
+      - verificationToken
+      type: object
+    user_mission_create_request:
+      properties:
+        UserId:
+          example: 1
+          type: number
+        title:
+          example: おやすみ前に！整えストレッチ
+          type: string
+        description:
+          example: 今日もお疲れさまでした！1日の最後に身体をゆったり伸ばして身体全体を整えていきましょう。
+          type: string
+        type:
+          $ref: '#/components/schemas/user_mission_type'
+        UserMissionNotifications:
+          description: send empty array if you want to delete notifications when updating
+          items:
+            $ref: '#/components/schemas/user_mission_notification'
+          type: array
+        Movie4MeasureIds:
+          description: send empty array if you want to delete movies when updating
+          items:
+            example: 135
+            type: integer
+          type: array
+        archivedAt:
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - UserId
+      - description
+      - title
+      - type
+      type: object
+    user_mission_update_request:
+      properties:
+        title:
+          example: おやすみ前に！整えストレッチ
+          type: string
+        description:
+          example: 今日もお疲れさまでした！1日の最後に身体をゆったり伸ばして身体全体を整えていきましょう。
+          type: string
+        UserMissionNotifications:
+          description: send empty array if you want to delete notifications when updating
+          items:
+            $ref: '#/components/schemas/user_mission_notification'
+          type: array
+        Movie4MeasureIds:
+          description: send empty array if you want to delete movies when updating
+          items:
+            example: 135
+            type: integer
+          type: array
+        archivedAt:
+          format: date-time
+          nullable: true
+          type: string
+        isNotificationRequired:
+          description: "if true, email will be delivered to user of `UserMission.UserId`"
+          type: boolean
+      type: object
+    user_mission_notification_request:
+      properties:
+        UserMissionId:
+          example: 1a1df803-bbe3-4936-bd79-303bf89917db
+          type: string
+        hourMinute:
+          example: 12:00
+          type: string
+      required:
+      - UserMissionId
+      - hourMinute
+      type: object
+    user_therapist_goal_request:
+      properties:
+        id:
+          description: user id
+          example: 1
+          type: number
+        userGoal:
+          $ref: '#/components/schemas/user_therapist_goal_request_userGoal'
+      required:
+      - id
+      - userGoal
+      type: object
+    movie_for_measure_update_request:
+      properties:
+        name:
+          type: string
+        categoryDifficulty:
+          $ref: '#/components/schemas/movie_for_measure_category_difficulty'
+        catchphrase:
+          type: string
+        detail:
+          type: string
+        isDisplayed:
+          type: boolean
+        recommendedFrequency:
+          type: string
+        playtimeSeconds:
+          type: integer
+        version:
+          $ref: '#/components/schemas/movie_for_measure_version'
+        fileName:
+          type: string
+        tagIds:
+          items:
+            type: number
+          type: array
+      required:
+      - fileName
+      - isDisplayed
+      - name
+      - tagIds
+      - version
+      type: object
+    movie_for_measure_tag_update_request:
+      properties:
+        name:
+          type: string
+        displayOrder:
+          type: number
+        Movie4MeasureTagGroupId:
+          type: number
+      required:
+      - Movie4MeasureTagGroupId
+      - displayOrder
+      - name
+      type: object
+    movie_for_measure_tag_group_update_request:
+      properties:
+        name:
+          type: string
+        displayOrder:
+          type: number
+      required:
+      - displayOrder
+      - name
+      type: object
+    admin_therapist_premium_data_update_request:
+      properties:
+        canAppointment:
+          type: boolean
+        strongTypeIds:
+          items:
+            type: integer
+          type: array
+        personalityTypeIds:
+          items:
+            type: integer
+          type: array
+        subInformations:
+          items:
+            $ref: '#/components/schemas/admin_therapist_premium_data_update_request_subInformations_inner'
+          type: array
+      type: object
+    admin_therapist_reputation_status_update_request:
+      properties:
+        status:
+          $ref: '#/components/schemas/therapist_reputation_status'
+      type: object
+    create_temp_user_of_suite_request:
+      properties:
+        companyCode:
+          type: string
+        email:
+          example: aaaa@example.com
+          type: string
+      required:
+      - companyCode
+      - email
+      type: object
+    user_therapist_response:
+      example:
+        Users:
+        - latestMessageAt: 2017-01-02T12:00:00Z
+          latestSenderType: 2
+          sex: null
+          codeExpiration: 2021-09-21T01:08:08.031Z
+          registeredAt: 2000-01-23T04:56:07.000+00:00
+          unreadCount: "2"
+          isNew: false
+          isActiveCustomer: true
+          MPainTypeId: 0
+          firstName: 健人
+          replyLater: false
+          MCompanyName: 株式会社テストA
+          firstAppointment:
+            therapistId: 6.027456183070403
+            cancellationReason: cancellationReason
+            timezone: timezone
+            type:
+              duration: 1.4658129805029452
+              name: null
+              label: label
+            userName: userName
+            userId: 0.8008281904610115
+            meetingUrl: meetingUrl
+            isCancelOnTheDay: false
+            meetingPassword: meetingPassword
+            calendlyEventId: calendlyEventId
+            canceledAt: canceledAt
+            therapistName: therapistName
+            cancellerId: 5.962133916683182
+            startTime: startTime
+            id: id
+            endTime: endTime
+            dueToTherapistCancel: true
+          UserId: 1
+          userPlanStatusEndDate: 2000-01-23T04:56:07.000+00:00
+          familyName: 田中
+          MCompanyId: 1
+          isExpiredCustomer: false
+          painTypes:
+          - MPainTypeId: 1
+            UserId: 6
+            name: name
+          - MPainTypeId: 1
+            UserId: 6
+            name: name
+          age: 5
+          status: 1
+          allocatedAt: 2000-01-23T04:56:07.000+00:00
+        - latestMessageAt: 2017-01-02T12:00:00Z
+          latestSenderType: 2
+          sex: null
+          codeExpiration: 2021-09-21T01:08:08.031Z
+          registeredAt: 2000-01-23T04:56:07.000+00:00
+          unreadCount: "2"
+          isNew: false
+          isActiveCustomer: true
+          MPainTypeId: 0
+          firstName: 健人
+          replyLater: false
+          MCompanyName: 株式会社テストA
+          firstAppointment:
+            therapistId: 6.027456183070403
+            cancellationReason: cancellationReason
+            timezone: timezone
+            type:
+              duration: 1.4658129805029452
+              name: null
+              label: label
+            userName: userName
+            userId: 0.8008281904610115
+            meetingUrl: meetingUrl
+            isCancelOnTheDay: false
+            meetingPassword: meetingPassword
+            calendlyEventId: calendlyEventId
+            canceledAt: canceledAt
+            therapistName: therapistName
+            cancellerId: 5.962133916683182
+            startTime: startTime
+            id: id
+            endTime: endTime
+            dueToTherapistCancel: true
+          UserId: 1
+          userPlanStatusEndDate: 2000-01-23T04:56:07.000+00:00
+          familyName: 田中
+          MCompanyId: 1
+          isExpiredCustomer: false
+          painTypes:
+          - MPainTypeId: 1
+            UserId: 6
+            name: name
+          - MPainTypeId: 1
+            UserId: 6
+            name: name
+          age: 5
+          status: 1
+          allocatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        Users:
+          items:
+            $ref: '#/components/schemas/user_therapist'
+          type: array
+      required:
+      - Users
+      type: object
+    switch_email_and_sub_email_response:
+      example:
+        subEmail:
+          createdAt: 2000-01-23T04:56:07.000+00:00
+          isVerified: true
+          UserId: 6
+          id: 0
+          verificationTokenExpiredAt: 2000-01-23T04:56:07.000+00:00
+          email: email
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        mainEmail: aaaa@example.com
+      properties:
+        mainEmail:
+          example: aaaa@example.com
+          type: string
+        subEmail:
+          $ref: '#/components/schemas/user_email'
+      required:
+      - mainEmail
+      - subEmail
+      type: object
+    appointable_therapists_response:
+      items:
+        $ref: '#/components/schemas/appointableTherapist'
+      type: array
+    MGrade:
+      enum:
+      - ADVANCED
+      - PREMIUM
+      - SUITE
+      example: PREMIUM
+      type: string
+    timezone:
+      example:
+        offset: offset
+        name: name
+      properties:
+        name:
+          type: string
+        offset:
+          type: string
+      required:
+      - name
+      - offset
+      type: object
+    user_missions:
+      items:
+        $ref: '#/components/schemas/user_mission'
+      type: array
+    user_mission_execution_request:
+      properties:
+        UserMissionId:
+          example: 1a1df803-bbe3-4936-bd79-303bf89917db
+          type: string
+        date:
+          example: 2020-10-01
+          type: string
+      required:
+      - UserMissionId
+      - date
+      type: object
+    user_mission_execution:
+      example:
+        date: 2020-09-30
+        createdAt: 2020-10-01T10:00:00+09:00
+        id: aa1df803-bbe3-4936-bd79-303bf89917aa
+        UserMissionId: 1a1df803-bbe3-4936-bd79-303bf89917db
+      properties:
+        id:
+          example: aa1df803-bbe3-4936-bd79-303bf89917aa
+          type: string
+        UserMissionId:
+          example: 1a1df803-bbe3-4936-bd79-303bf89917db
+          type: string
+        date:
+          example: 2020-09-30
+          type: string
+        createdAt:
+          example: 2020-10-01T10:00:00+09:00
+          format: date-time
+          type: string
+      required:
+      - UserMissionId
+      - createdAt
+      - date
+      - id
+      type: object
+    user_mission_comment_tag_request:
+      properties:
+        UserMissionCommentId:
+          type: string
+        type:
+          $ref: '#/components/schemas/user_mission_comment_tag_type'
+      required:
+      - UserMissionCommentId
+      - type
+      type: object
+    user_mission_comment_tag:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        UserMissionCommentId: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+        UserId: 1
+        id: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+        type: null
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          example: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+          type: string
+        UserMissionCommentId:
+          example: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+          type: string
+        UserId:
+          example: 1
+          type: number
+        type:
+          $ref: '#/components/schemas/user_mission_comment_tag_type'
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - UserId
+      - UserMissionCommentId
+      - createdAt
+      - id
+      - type
+      - updatedAt
+      type: object
+    user_mission_comment_request:
+      properties:
+        UserMissionId:
+          example: 1a1df803-bbe3-4936-bd79-303bf89917db
+          type: string
+        text:
+          example: このエクササイズは私には少し難しいです
+          type: string
+      required:
+      - UserMissionId
+      - text
+      type: object
+    user_mission_comment:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        UserMissionCommentTags:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          UserMissionCommentId: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+          UserId: 1
+          id: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+          type: null
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          UserMissionCommentId: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+          UserId: 1
+          id: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+          type: null
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        UserId: 1
+        anotherHasRead: true
+        id: 77d3b5ed-6f77-4598-b26f-dfbda5c0d02e
+        text: このエクササイズは私には少し難しいです
+        UserMissionId: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+      properties:
+        id:
+          example: 77d3b5ed-6f77-4598-b26f-dfbda5c0d02e
+          type: string
+        UserMissionId:
+          example: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+          type: string
+        UserId:
+          example: 1
+          type: integer
+        text:
+          example: このエクササイズは私には少し難しいです
+          type: string
+        anotherHasRead:
+          description: "It means therapist has read this comment if this is user's\
+            \ comment, and vice versa."
+          type: boolean
+        UserMissionCommentTags:
+          items:
+            $ref: '#/components/schemas/user_mission_comment_tag'
+          type: array
+        createdAt:
+          format: date-time
+          type: string
+      required:
+      - UserId
+      - UserMissionCommentTags
+      - UserMissionId
+      - anotherHasRead
+      - createdAt
+      - id
+      - text
+      type: object
+    consultationType:
+      enum:
+      - first
+      - follow
+      type: string
+    consultation_scheduled_event:
+      example:
+        eventId: eventId
+        createdAt: createdAt
+        endDate: endDate
+        canceledAt: 2000-01-23T04:56:07.000+00:00
+        cancellationReason: cancellationReason
+        UserId: 6
+        TherapistId: 0
+        id: id
+        eventType: null
+        meetingUrl: meetingUrl
+        startDate: startDate
+        updatedAt: updatedAt
+      properties:
+        id:
+          type: string
+        eventId:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        TherapistId:
+          type: integer
+        UserId:
+          type: integer
+        canceledAt:
+          format: date-time
+          type: string
+        eventType:
+          $ref: '#/components/schemas/consultationType'
+        cancellationReason:
+          type: string
+        meetingUrl:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+      - TherapistId
+      - UserId
+      - createdAt
+      - endDate
+      - eventId
+      - eventType
+      - id
+      - startDate
+      - updatedAt
+      type: object
+    user_notification:
+      example:
+        date: 2020-09-24
+        notifications:
+        - sourceId: 1a1df803-bbe3-4936-bd79-303bf89917db
+          createdAt: 2020-10-01T10:00:00Z
+          type: MISSION_COMPLETED
+        - sourceId: 1a1df803-bbe3-4936-bd79-303bf89917db
+          createdAt: 2020-10-01T10:00:00Z
+          type: MISSION_COMPLETED
+      properties:
+        date:
+          example: 2020-09-24
+          format: YYYY-MM-DD
+          type: string
+        notifications:
+          items:
+            $ref: '#/components/schemas/user_notification_notification'
+          type: array
+      required:
+      - date
+      - notifications
+      type: object
+    allocate_therapist_request:
+      properties:
+        schedules:
+          items:
+            $ref: '#/components/schemas/availableConsultationSchedule'
+          type: array
+      required:
+      - schedules
+      type: object
+    movie_for_measure:
+      example:
+        fileName: fileName
+        recommendedFrequency: recommendedFrequency
+        catchphrase: catchphrase
+        type: type
+        precaution: precaution
+        frequency: frequency
+        illustrationFileName: illustrationFileName
+        times: times
+        settingNum: 5
+        categoryDifficulty: null
+        movieUrl: movieUrl
+        introSeconds: 13
+        Movie4MeasureTags:
+        - Movie4MeasureTagGroup:
+            name: 痛みの種類
+            displayOrder: 10
+            Movie4MeasureTags:
+            - null
+            - null
+            id: 1
+          name: 座って
+          displayOrder: 10
+          id: 6
+        - Movie4MeasureTagGroup:
+            name: 痛みの種類
+            displayOrder: 10
+            Movie4MeasureTags:
+            - null
+            - null
+            id: 1
+          name: 座って
+          displayOrder: 10
+          id: 6
+        id: 103
+        thumbUrl: thumbUrl
+        efficancy: efficancy
+        discription: discription
+        isDisplayed: true
+        version: "2.0"
+        categoryPurpose: categoryPurpose
+        playtimeSeconds: 355
+        contentUrl: contentUrl
+        name: name
+        detail: detail
+        categoryBodyPosition: categoryBodyPosition
+        coin: 0
+      properties:
+        id:
+          example: 103
+          type: integer
+        categoryBodyPosition:
+          type: string
+        categoryPurpose:
+          type: string
+        categoryDifficulty:
+          $ref: '#/components/schemas/movie_for_measure_category_difficulty'
+        name:
+          type: string
+        movieUrl:
+          type: string
+        discription:
+          type: string
+        efficancy:
+          type: string
+        precaution:
+          type: string
+        type:
+          type: string
+        fileName:
+          type: string
+        coin:
+          type: integer
+        times:
+          type: string
+        frequency:
+          type: string
+        catchphrase:
+          type: string
+        detail:
+          type: string
+        isDisplayed:
+          type: boolean
+        illustrationFileName:
+          type: string
+        recommendedFrequency:
+          type: string
+        version:
+          $ref: '#/components/schemas/movie_for_measure_version'
+        playtimeSeconds:
+          example: 355
+          type: integer
+        introSeconds:
+          example: 13
+          type: integer
+        Movie4MeasureTags:
+          items:
+            $ref: '#/components/schemas/movie_for_measure_tag'
+          type: array
+        contentUrl:
+          type: string
+        thumbUrl:
+          type: string
+        settingNum:
+          type: integer
+      required:
+      - Movie4MeasureTags
+      - categoryDifficulty
+      - contentUrl
+      - discription
+      - id
+      - isDisplayed
+      - movieUrl
+      - name
+      - settingNum
+      - thumbUrl
+      - type
+      - version
+      type: object
+    user_mission_movie_request:
+      properties:
+        UserMissionId:
+          example: 1a1ds803-bbe3-4936-bd79-303bf89917db
+          type: string
+        beforeMovie4MeasureId:
+          example: 1
+          type: integer
+        afterMovie4MeasureId:
+          example: 2
+          type: integer
+      required:
+      - UserMissionId
+      - afterMovie4MeasureId
+      - beforeMovie4MeasureId
+      type: object
+    assignmentWithTherapistInfo:
+      example:
+        therapistId: 6
+        createdAt: createdAt
+        therapistUserId: 1
+        therapistName: therapistName
+        startTime: startTime
+        id: id
+        endTime: endTime
+        userId: 0
+      properties:
+        id:
+          type: string
+        userId:
+          type: integer
+        therapistId:
+          type: integer
+        therapistUserId:
+          type: integer
+        therapistName:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          nullable: true
+          type: string
+        createdAt:
+          type: string
+      required:
+      - createdAt
+      - endTime
+      - id
+      - startTime
+      - therapistId
+      - therapistName
+      - therapistUserId
+      - userId
+      type: object
+    movie_for_measure_tag_group:
+      example:
+        name: 痛みの種類
+        displayOrder: 10
+        Movie4MeasureTags:
+        - null
+        - null
+        id: 1
+      properties:
+        id:
+          type: integer
+        name:
+          example: 痛みの種類
+          type: string
+        displayOrder:
+          example: 10
+          type: integer
+        Movie4MeasureTags:
+          items:
+            $ref: '#/components/schemas/movie_for_measure_tag'
+          type: array
+      required:
+      - Movie4MeasureTags
+      - displayOrder
+      - id
+      - name
+      type: object
+    current_assigned_number:
+      example:
+        suite: 0
+      properties:
+        suite:
+          type: integer
+      type: object
+    user_mission:
+      example:
+        archivedAt: 2000-01-23T04:56:07.000+00:00
+        UserMissionExecutions:
+        - date: 2020-09-30
+          createdAt: 2020-10-01T10:00:00+09:00
+          id: aa1df803-bbe3-4936-bd79-303bf89917aa
+          UserMissionId: 1a1df803-bbe3-4936-bd79-303bf89917db
+        - date: 2020-09-30
+          createdAt: 2020-10-01T10:00:00+09:00
+          id: aa1df803-bbe3-4936-bd79-303bf89917aa
+          UserMissionId: 1a1df803-bbe3-4936-bd79-303bf89917db
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        movieRevisions:
+        - movies:
+          - fileName: fileName
+            recommendedFrequency: recommendedFrequency
+            catchphrase: catchphrase
+            type: type
+            precaution: precaution
+            frequency: frequency
+            illustrationFileName: illustrationFileName
+            times: times
+            settingNum: 5
+            categoryDifficulty: null
+            movieUrl: movieUrl
+            introSeconds: 13
+            Movie4MeasureTags:
+            - Movie4MeasureTagGroup:
+                name: 痛みの種類
+                displayOrder: 10
+                Movie4MeasureTags:
+                - null
+                - null
+                id: 1
+              name: 座って
+              displayOrder: 10
+              id: 6
+            - Movie4MeasureTagGroup:
+                name: 痛みの種類
+                displayOrder: 10
+                Movie4MeasureTags:
+                - null
+                - null
+                id: 1
+              name: 座って
+              displayOrder: 10
+              id: 6
+            id: 103
+            thumbUrl: thumbUrl
+            efficancy: efficancy
+            discription: discription
+            isDisplayed: true
+            version: "2.0"
+            categoryPurpose: categoryPurpose
+            playtimeSeconds: 355
+            contentUrl: contentUrl
+            name: name
+            detail: detail
+            categoryBodyPosition: categoryBodyPosition
+            coin: 0
+          - fileName: fileName
+            recommendedFrequency: recommendedFrequency
+            catchphrase: catchphrase
+            type: type
+            precaution: precaution
+            frequency: frequency
+            illustrationFileName: illustrationFileName
+            times: times
+            settingNum: 5
+            categoryDifficulty: null
+            movieUrl: movieUrl
+            introSeconds: 13
+            Movie4MeasureTags:
+            - Movie4MeasureTagGroup:
+                name: 痛みの種類
+                displayOrder: 10
+                Movie4MeasureTags:
+                - null
+                - null
+                id: 1
+              name: 座って
+              displayOrder: 10
+              id: 6
+            - Movie4MeasureTagGroup:
+                name: 痛みの種類
+                displayOrder: 10
+                Movie4MeasureTags:
+                - null
+                - null
+                id: 1
+              name: 座って
+              displayOrder: 10
+              id: 6
+            id: 103
+            thumbUrl: thumbUrl
+            efficancy: efficancy
+            discription: discription
+            isDisplayed: true
+            version: "2.0"
+            categoryPurpose: categoryPurpose
+            playtimeSeconds: 355
+            contentUrl: contentUrl
+            name: name
+            detail: detail
+            categoryBodyPosition: categoryBodyPosition
+            coin: 0
+          createdAt: 2020-10-01T10:00:00+09:00
+          createdBy: null
+          id: 1a1ds803-bbe3-4936-bd79-303bf89917db
+          version: 1
+        - movies:
+          - fileName: fileName
+            recommendedFrequency: recommendedFrequency
+            catchphrase: catchphrase
+            type: type
+            precaution: precaution
+            frequency: frequency
+            illustrationFileName: illustrationFileName
+            times: times
+            settingNum: 5
+            categoryDifficulty: null
+            movieUrl: movieUrl
+            introSeconds: 13
+            Movie4MeasureTags:
+            - Movie4MeasureTagGroup:
+                name: 痛みの種類
+                displayOrder: 10
+                Movie4MeasureTags:
+                - null
+                - null
+                id: 1
+              name: 座って
+              displayOrder: 10
+              id: 6
+            - Movie4MeasureTagGroup:
+                name: 痛みの種類
+                displayOrder: 10
+                Movie4MeasureTags:
+                - null
+                - null
+                id: 1
+              name: 座って
+              displayOrder: 10
+              id: 6
+            id: 103
+            thumbUrl: thumbUrl
+            efficancy: efficancy
+            discription: discription
+            isDisplayed: true
+            version: "2.0"
+            categoryPurpose: categoryPurpose
+            playtimeSeconds: 355
+            contentUrl: contentUrl
+            name: name
+            detail: detail
+            categoryBodyPosition: categoryBodyPosition
+            coin: 0
+          - fileName: fileName
+            recommendedFrequency: recommendedFrequency
+            catchphrase: catchphrase
+            type: type
+            precaution: precaution
+            frequency: frequency
+            illustrationFileName: illustrationFileName
+            times: times
+            settingNum: 5
+            categoryDifficulty: null
+            movieUrl: movieUrl
+            introSeconds: 13
+            Movie4MeasureTags:
+            - Movie4MeasureTagGroup:
+                name: 痛みの種類
+                displayOrder: 10
+                Movie4MeasureTags:
+                - null
+                - null
+                id: 1
+              name: 座って
+              displayOrder: 10
+              id: 6
+            - Movie4MeasureTagGroup:
+                name: 痛みの種類
+                displayOrder: 10
+                Movie4MeasureTags:
+                - null
+                - null
+                id: 1
+              name: 座って
+              displayOrder: 10
+              id: 6
+            id: 103
+            thumbUrl: thumbUrl
+            efficancy: efficancy
+            discription: discription
+            isDisplayed: true
+            version: "2.0"
+            categoryPurpose: categoryPurpose
+            playtimeSeconds: 355
+            contentUrl: contentUrl
+            name: name
+            detail: detail
+            categoryBodyPosition: categoryBodyPosition
+            coin: 0
+          createdAt: 2020-10-01T10:00:00+09:00
+          createdBy: null
+          id: 1a1ds803-bbe3-4936-bd79-303bf89917db
+          version: 1
+        UserId: 12
+        UserMissionComments:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          UserMissionCommentTags:
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            UserMissionCommentId: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+            UserId: 1
+            id: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+            type: null
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            UserMissionCommentId: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+            UserId: 1
+            id: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+            type: null
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          UserId: 1
+          anotherHasRead: true
+          id: 77d3b5ed-6f77-4598-b26f-dfbda5c0d02e
+          text: このエクササイズは私には少し難しいです
+          UserMissionId: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          UserMissionCommentTags:
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            UserMissionCommentId: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+            UserId: 1
+            id: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+            type: null
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            UserMissionCommentId: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+            UserId: 1
+            id: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+            type: null
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          UserId: 1
+          anotherHasRead: true
+          id: 77d3b5ed-6f77-4598-b26f-dfbda5c0d02e
+          text: このエクササイズは私には少し難しいです
+          UserMissionId: 00d3b5ed-6f77-4598-b26f-dfbda5c0d000
+        description: 今日もお疲れさまでした！1日の最後に身体をゆったり伸ばして身体全体を整えていきましょう。
+        id: XXXXX
+        UserMissionNotifications:
+        - dayOfTheWeek: 0
+          hourMinute: 06:00
+        - dayOfTheWeek: 0
+          hourMinute: 06:00
+        title: おやすみ前に！整えストレッチ
+        type: null
+        Movie4Measures:
+        - fileName: fileName
+          recommendedFrequency: recommendedFrequency
+          catchphrase: catchphrase
+          type: type
+          precaution: precaution
+          frequency: frequency
+          illustrationFileName: illustrationFileName
+          times: times
+          settingNum: 5
+          categoryDifficulty: null
+          movieUrl: movieUrl
+          introSeconds: 13
+          Movie4MeasureTags:
+          - Movie4MeasureTagGroup:
+              name: 痛みの種類
+              displayOrder: 10
+              Movie4MeasureTags:
+              - null
+              - null
+              id: 1
+            name: 座って
+            displayOrder: 10
+            id: 6
+          - Movie4MeasureTagGroup:
+              name: 痛みの種類
+              displayOrder: 10
+              Movie4MeasureTags:
+              - null
+              - null
+              id: 1
+            name: 座って
+            displayOrder: 10
+            id: 6
+          id: 103
+          thumbUrl: thumbUrl
+          efficancy: efficancy
+          discription: discription
+          isDisplayed: true
+          version: "2.0"
+          categoryPurpose: categoryPurpose
+          playtimeSeconds: 355
+          contentUrl: contentUrl
+          name: name
+          detail: detail
+          categoryBodyPosition: categoryBodyPosition
+          coin: 0
+        - fileName: fileName
+          recommendedFrequency: recommendedFrequency
+          catchphrase: catchphrase
+          type: type
+          precaution: precaution
+          frequency: frequency
+          illustrationFileName: illustrationFileName
+          times: times
+          settingNum: 5
+          categoryDifficulty: null
+          movieUrl: movieUrl
+          introSeconds: 13
+          Movie4MeasureTags:
+          - Movie4MeasureTagGroup:
+              name: 痛みの種類
+              displayOrder: 10
+              Movie4MeasureTags:
+              - null
+              - null
+              id: 1
+            name: 座って
+            displayOrder: 10
+            id: 6
+          - Movie4MeasureTagGroup:
+              name: 痛みの種類
+              displayOrder: 10
+              Movie4MeasureTags:
+              - null
+              - null
+              id: 1
+            name: 座って
+            displayOrder: 10
+            id: 6
+          id: 103
+          thumbUrl: thumbUrl
+          efficancy: efficancy
+          discription: discription
+          isDisplayed: true
+          version: "2.0"
+          categoryPurpose: categoryPurpose
+          playtimeSeconds: 355
+          contentUrl: contentUrl
+          name: name
+          detail: detail
+          categoryBodyPosition: categoryBodyPosition
+          coin: 0
+      properties:
+        id:
+          example: XXXXX
+          type: string
+        UserId:
+          example: 12
+          type: integer
+        title:
+          example: おやすみ前に！整えストレッチ
+          type: string
+        description:
+          example: 今日もお疲れさまでした！1日の最後に身体をゆったり伸ばして身体全体を整えていきましょう。
+          type: string
+        type:
+          $ref: '#/components/schemas/user_mission_type'
+        archivedAt:
+          format: date-time
+          nullable: true
+          type: string
+        UserMissionNotifications:
+          items:
+            $ref: '#/components/schemas/user_mission_notification'
+          type: array
+        UserMissionExecutions:
+          items:
+            $ref: '#/components/schemas/user_mission_execution'
+          type: array
+        UserMissionComments:
+          items:
+            $ref: '#/components/schemas/user_mission_comment'
+          type: array
+        Movie4Measures:
+          items:
+            $ref: '#/components/schemas/movie_for_measure'
+          type: array
+        createdAt:
+          format: date-time
+          type: string
+        movieRevisions:
+          items:
+            $ref: '#/components/schemas/user_mission_movie_revision'
+          type: array
+      required:
+      - Movie4Measures
+      - UserId
+      - UserMissionComments
+      - UserMissionExecutions
+      - UserMissionNotifications
+      - archivedAt
+      - createdAt
+      - description
+      - id
+      - movieRevisions
+      - title
+      - type
+      type: object
+    movie_for_measure_tag:
+      example:
+        Movie4MeasureTagGroup:
+          name: 痛みの種類
+          displayOrder: 10
+          Movie4MeasureTags:
+          - null
+          - null
+          id: 1
+        name: 座って
+        displayOrder: 10
+        id: 6
+      properties:
+        id:
+          type: integer
+        name:
+          example: 座って
+          type: string
+        displayOrder:
+          example: 10
+          type: integer
+        Movie4MeasureTagGroup:
+          $ref: '#/components/schemas/movie_for_measure_tag_group'
+      required:
+      - displayOrder
+      - id
+      - name
+      type: object
+    therapist_appointment_times:
+      example:
+        appointmentTimes: 6
+        userId: 0
+      properties:
+        userId:
+          type: integer
+        appointmentTimes:
+          type: integer
+      required:
+      - appointmentTimes
+      - userId
+      type: object
+    availableConsultationSchedule:
+      example:
+        dayType:
+          name: name
+          text: text
+        timeRange:
+          name: name
+          text: text
+      properties:
+        dayType:
+          $ref: '#/components/schemas/dayType'
+        timeRange:
+          $ref: '#/components/schemas/timeRange'
+      required:
+      - dayType
+      - timeRange
+      type: object
+    user_mission_notification:
+      example:
+        dayOfTheWeek: 0
+        hourMinute: 06:00
+      properties:
+        dayOfTheWeek:
+          description: |
+            | dayOfTheWeek | text |
+            |-----------|-------|
+            | 0 | 日 |
+            | 1 | 月 |
+            | 2 | 火 |
+            | 3 | 水 |
+            | 4 | 木 |
+            | 5 | 金 |
+            | 6 | 土 |
+          example: 0
+          type: integer
+        hourMinute:
+          example: 06:00
+          type: string
+      required:
+      - dayOfTheWeek
+      - hourMinute
+      type: object
+    user_mission_type:
+      enum:
+      - DAILY
+      - FREE
+      type: string
+    movie_for_measure_category_difficulty:
+      enum:
+      - "1"
+      - "2"
+      - "3"
+      type: string
+      x-enum-varnames:
+      - NOVICE
+      - INTERMEDIATE
+      - ADVANCED
+    movie_for_measure_version:
+      enum:
+      - "1.0"
+      - "2.0"
+      example: "2.0"
+      type: string
+    user_mission_comment_tag_type:
+      enum:
+      - GOOD
+      type: string
+    user_notification_notification:
+      example:
+        sourceId: 1a1df803-bbe3-4936-bd79-303bf89917db
+        createdAt: 2020-10-01T10:00:00Z
+        type: MISSION_COMPLETED
+      properties:
+        type:
+          enum:
+          - MISSION_COMPLETED
+          - MISSION_UPDATED
+          - THERAPIST_LIKED
+          - THERAPIST_COMMENTED
+          example: MISSION_COMPLETED
+          type: string
+        sourceId:
+          example: 1a1df803-bbe3-4936-bd79-303bf89917db
+          type: string
+        createdAt:
+          example: 2020-10-01T10:00:00Z
+          format: date-time
+          type: string
+      required:
+      - createdAt
+      - sourceId
+      - type
+      type: object
+    user_mission_movie_revision:
+      example:
+        movies:
+        - fileName: fileName
+          recommendedFrequency: recommendedFrequency
+          catchphrase: catchphrase
+          type: type
+          precaution: precaution
+          frequency: frequency
+          illustrationFileName: illustrationFileName
+          times: times
+          settingNum: 5
+          categoryDifficulty: null
+          movieUrl: movieUrl
+          introSeconds: 13
+          Movie4MeasureTags:
+          - Movie4MeasureTagGroup:
+              name: 痛みの種類
+              displayOrder: 10
+              Movie4MeasureTags:
+              - null
+              - null
+              id: 1
+            name: 座って
+            displayOrder: 10
+            id: 6
+          - Movie4MeasureTagGroup:
+              name: 痛みの種類
+              displayOrder: 10
+              Movie4MeasureTags:
+              - null
+              - null
+              id: 1
+            name: 座って
+            displayOrder: 10
+            id: 6
+          id: 103
+          thumbUrl: thumbUrl
+          efficancy: efficancy
+          discription: discription
+          isDisplayed: true
+          version: "2.0"
+          categoryPurpose: categoryPurpose
+          playtimeSeconds: 355
+          contentUrl: contentUrl
+          name: name
+          detail: detail
+          categoryBodyPosition: categoryBodyPosition
+          coin: 0
+        - fileName: fileName
+          recommendedFrequency: recommendedFrequency
+          catchphrase: catchphrase
+          type: type
+          precaution: precaution
+          frequency: frequency
+          illustrationFileName: illustrationFileName
+          times: times
+          settingNum: 5
+          categoryDifficulty: null
+          movieUrl: movieUrl
+          introSeconds: 13
+          Movie4MeasureTags:
+          - Movie4MeasureTagGroup:
+              name: 痛みの種類
+              displayOrder: 10
+              Movie4MeasureTags:
+              - null
+              - null
+              id: 1
+            name: 座って
+            displayOrder: 10
+            id: 6
+          - Movie4MeasureTagGroup:
+              name: 痛みの種類
+              displayOrder: 10
+              Movie4MeasureTags:
+              - null
+              - null
+              id: 1
+            name: 座って
+            displayOrder: 10
+            id: 6
+          id: 103
+          thumbUrl: thumbUrl
+          efficancy: efficancy
+          discription: discription
+          isDisplayed: true
+          version: "2.0"
+          categoryPurpose: categoryPurpose
+          playtimeSeconds: 355
+          contentUrl: contentUrl
+          name: name
+          detail: detail
+          categoryBodyPosition: categoryBodyPosition
+          coin: 0
+        createdAt: 2020-10-01T10:00:00+09:00
+        createdBy: null
+        id: 1a1ds803-bbe3-4936-bd79-303bf89917db
+        version: 1
+      properties:
+        id:
+          example: 1a1ds803-bbe3-4936-bd79-303bf89917db
+          type: string
+        version:
+          example: 1
+          type: integer
+        createdBy:
+          $ref: '#/components/schemas/user_role'
+        movies:
+          items:
+            $ref: '#/components/schemas/movie_for_measure'
+          type: array
+        createdAt:
+          example: 2020-10-01T10:00:00+09:00
+          format: date-time
+          type: string
+      required:
+      - createdAt
+      - createdBy
+      - id
+      - movies
+      - version
+      type: object
+    dayType:
+      example:
+        name: name
+        text: text
+      properties:
+        name:
+          type: string
+        text:
+          type: string
+      type: object
+    timeRange:
+      example:
+        name: name
+        text: text
+      properties:
+        name:
+          type: string
+        text:
+          type: string
+      type: object
+    user_role:
+      enum:
+      - user
+      - therapist
+      - admin
+      type: string
+    createUserOverallRecords_request:
+      oneOf:
+      - $ref: '#/components/schemas/user_overall_first_record_create_request'
+      - $ref: '#/components/schemas/user_overall_soap_record_create_request'
+    updateUserOverallRecord_request:
+      oneOf:
+      - $ref: '#/components/schemas/user_overall_first_record_update_request'
+      - $ref: '#/components/schemas/user_overall_soap_record_update_request'
+    appointment_record_allOf:
+      properties:
+        UserOverallRecord:
+          $ref: '#/components/schemas/user_overall_record'
+      type: object
+      example: null
+    appointment_record_allOf_1:
+      properties:
+        isFirstAppointment:
+          type: boolean
+      required:
+      - isFirstAppointment
+      type: object
+      example: null
+    user_overall_first_record_allOf_FirstRecord:
+      properties:
+        PainTypes:
+          items:
+            $ref: '#/components/schemas/user_overall_first_record_pain_type'
+          type: array
+        physicalAssessment:
+          nullable: false
+          type: string
+        painPoint:
+          nullable: false
+          type: string
+        workContents:
+          nullable: false
+          type: string
+        pastStrategy:
+          nullable: false
+          type: string
+        visitHistory:
+          nullable: false
+          type: string
+        usedMedicine:
+          nullable: false
+          type: string
+        userMotivation:
+          nullable: false
+          type: string
+        exerciseHabits:
+          nullable: true
+          type: string
+        sleepQuality:
+          nullable: true
+          type: string
+        workStation:
+          nullable: true
+          type: string
+        stress:
+          nullable: true
+          type: string
+        freeRecord:
+          nullable: true
+          type: string
+      required:
+      - PainTypes
+      - painPoint
+      - pastStrategy
+      - physicalAssessment
+      - usedMedicine
+      - userMotivation
+      - visitHistory
+      - workContents
+      type: object
+      example: null
+    user_overall_first_record_allOf:
+      properties:
+        type:
+          enum:
+          - first
+          type: string
+        FirstRecord:
+          $ref: '#/components/schemas/user_overall_first_record_allOf_FirstRecord'
+        SoapRecord:
+          nullable: true
+          type: object
+          example: null
+      required:
+      - FirstRecord
+      - SoapRecord
+      - type
+      type: object
+      example: null
+    user_overall_soap_record_allOf_SoapRecord:
+      properties:
+        subjective:
+          nullable: false
+          type: string
+        objective:
+          nullable: false
+          type: string
+        assessment:
+          nullable: false
+          type: string
+        plan:
+          nullable: false
+          type: string
+      required:
+      - assessment
+      - objective
+      - plan
+      - subjective
+      type: object
+      example: null
+    user_overall_soap_record_allOf:
+      properties:
+        type:
+          enum:
+          - soap
+          type: string
+        FirstRecord:
+          nullable: true
+          type: object
+          example: null
+        SoapRecord:
+          $ref: '#/components/schemas/user_overall_soap_record_allOf_SoapRecord'
+      required:
+      - FirstRecord
+      - SoapRecord
+      - type
+      type: object
+      example: null
+    user_overall_first_record_create_request_FirstRecord_PainTypes_inner:
+      properties:
+        id:
+          type: integer
+      required:
+      - id
+      type: object
+    user_overall_first_record_create_request_FirstRecord:
+      properties:
+        PainTypes:
+          items:
+            $ref: '#/components/schemas/user_overall_first_record_create_request_FirstRecord_PainTypes_inner'
+          type: array
+        physicalAssessment:
+          nullable: false
+          type: string
+        painPoint:
+          nullable: false
+          type: string
+        workContents:
+          nullable: false
+          type: string
+        pastStrategy:
+          nullable: false
+          type: string
+        visitHistory:
+          nullable: false
+          type: string
+        usedMedicine:
+          nullable: false
+          type: string
+        userMotivation:
+          nullable: false
+          type: string
+        exerciseHabits:
+          nullable: true
+          type: string
+        sleepQuality:
+          nullable: true
+          type: string
+        workStation:
+          nullable: true
+          type: string
+        stress:
+          nullable: true
+          type: string
+        freeRecord:
+          nullable: true
+          type: string
+      required:
+      - PainTypes
+      - painPoint
+      - pastStrategy
+      - physicalAssessment
+      - usedMedicine
+      - userMotivation
+      - visitHistory
+      - workContents
+      type: object
+    user_overall_soap_record_create_request_SoapRecord:
+      properties:
+        subjective:
+          nullable: false
+          type: string
+        objective:
+          nullable: false
+          type: string
+        assessment:
+          nullable: false
+          type: string
+        plan:
+          nullable: false
+          type: string
+      required:
+      - assessment
+      - objective
+      - plan
+      - subjective
+      type: object
+    user_overall_first_record_update_request_allOf:
+      properties:
+        id:
+          type: string
+      required:
+      - id
+      type: object
+      example: null
+    appointableTherapist_reputations_inner:
+      example:
+        score: 2
+        TherapistId: 5
+        comment: comment
+        id: 5
+      properties:
+        id:
+          type: integer
+        TherapistId:
+          type: integer
+        comment:
+          type: string
+        score:
+          type: integer
+      type: object
+    update_assign_limit_request_inner:
+      example:
+        number: 0
+        MGrade: PREMIUM
+      properties:
+        number:
+          type: integer
+        MGrade:
+          $ref: '#/components/schemas/MGrade'
+      required:
+      - MGrade
+      - number
+      type: object
+    user_therapist_goal_request_userGoal:
+      properties:
+        goal:
+          example: 子供を肩車する
+          type: string
+        GoalStepMeasures:
+          description: you always have to send empty array in premium plan
+          items:
+            type: string
+          type: array
+      required:
+      - GoalStepMeasures
+      - goal
+      type: object
+    admin_therapist_premium_data_update_request_subInformations_inner:
+      properties:
+        type:
+          type: string
+        data:
+          type: string
+      type: object
+x-tagGroups:
+- name: Users
+  tags:
+  - common
+  - users_common
+  - users_premium
+  - users_suite
+- name: Therapists
+  tags:
+  - therapists_common
+  - therapists_premium
+- name: Admin
+  tags:
+  - admin
