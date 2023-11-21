@@ -1,0 +1,14 @@
+name: test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  envtest:
+    name: env test
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+      - name: sh
+        run: echo ${{ github.event.pull_request.user.login }}
